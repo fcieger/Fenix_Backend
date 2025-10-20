@@ -10,38 +10,16 @@ export class CertificadoController {
     private readonly cryptoService: CryptoService,
   ) {}
 
-  @Post('validate-password')
-  async validatePassword(@Body('senha') senha: string) {
-    try {
-      if (!senha) {
-        throw new BadRequestException('Senha é obrigatória');
-      }
-      
-      if (senha.length < 4) {
-        throw new BadRequestException('Senha deve ter pelo menos 4 caracteres');
-      }
-
-      return {
-        success: true,
-        message: 'Senha válida'
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  @Post('upload')
+  @Post('upload-file')
   @UseInterceptors(FileInterceptor('certificado'))
-  async uploadCertificado(
+  async uploadFile(
     @UploadedFile() file: any,
-    @Body('senha') senha: string,
     @Body('companyId') companyId: string,
     @Request() req: any
   ) {
     try {
-      console.log('📤 Upload recebido:', {
+      console.log('📤 Upload de arquivo recebido:', {
         hasFile: !!file,
-        hasSenha: !!senha,
         hasCompanyId: !!companyId,
         companyId: companyId,
         fileName: file?.originalname
@@ -49,10 +27,6 @@ export class CertificadoController {
 
       if (!file) {
         throw new BadRequestException('Arquivo é obrigatório');
-      }
-
-      if (!senha) {
-        throw new BadRequestException('Senha é obrigatória');
       }
 
       if (!companyId) {
@@ -67,21 +41,60 @@ export class CertificadoController {
         throw new BadRequestException('Arquivo muito grande. Máximo 5MB');
       }
 
-      const uploadData = {
-        arquivo: file.buffer,
-        senha: senha,
-        companyId,
-        criadoPor: req.user.id
-      };
-
-      const certificado = await this.certificadoService.create(uploadData);
+      // Salva o arquivo temporariamente e retorna um ID de sessão
+      const sessionId = await this.certificadoService.saveTemporaryFile(file, companyId, req.user.id);
 
       return {
         success: true,
+        message: 'Arquivo carregado com sucesso. Agora informe a senha.',
+        sessionId: sessionId,
+        fileName: file.originalname,
+        fileSize: file.size
+      };
+    } catch (error) {
+      console.error('❌ Erro no upload do arquivo:', error);
+      throw new BadRequestException({
+        message: error.message || 'Erro interno do servidor',
+        error: error.name || 'InternalServerError',
+        statusCode: 400
+      });
+    }
+  }
+
+  @Post('submit-password')
+  async submitPassword(
+    @Body('sessionId') sessionId: string,
+    @Body('senha') senha: string,
+    @Request() req: any
+  ) {
+    try {
+      console.log('🔐 Senha recebida para sessão:', {
+        sessionId: sessionId,
+        hasSenha: !!senha
+      });
+
+      if (!sessionId) {
+        throw new BadRequestException('ID da sessão é obrigatório');
+      }
+
+      if (!senha) {
+        throw new BadRequestException('Senha é obrigatória');
+      }
+
+      if (senha.length < 4) {
+        throw new BadRequestException('Senha deve ter pelo menos 4 caracteres');
+      }
+
+      // Processa o certificado com a senha fornecida
+      const certificado = await this.certificadoService.processCertificateWithPassword(sessionId, senha);
+
+      return {
+        success: true,
+        message: 'Certificado processado com sucesso!',
         certificado: this.certificadoService.mapToResponse(certificado)
       };
     } catch (error) {
-      console.error('❌ Erro no upload do certificado:', error);
+      console.error('❌ Erro ao processar senha:', error);
       throw new BadRequestException({
         message: error.message || 'Erro interno do servidor',
         error: error.name || 'InternalServerError',
