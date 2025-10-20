@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fenix-postgres
+    environment:
+      POSTGRES_DB: fenix_db
+      POSTGRES_USER: fenix_user
+      POSTGRES_PASSWORD: fenix_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fenix-network
+
+  fenix-backend:
+    build: .
+    container_name: fenix-backend-app
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=fenix_user
+      - DB_PASSWORD=fenix_password
+      - DB_DATABASE=fenix_db
+    depends_on:
+      - postgres
+    networks:
+      - fenix-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  fenix-network:
+    driver: bridge
