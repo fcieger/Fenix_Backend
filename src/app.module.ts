@@ -14,6 +14,7 @@ import { NaturezaOperacaoModule } from './natureza-operacao/natureza-operacao.mo
 import { PedidosVendaModule } from './pedidos-venda/pedidos-venda.module';
 import { ImpostosModule } from './impostos/impostos.module';
 import { PrazosPagamentoModule } from './prazos-pagamento/prazos-pagamento.module';
+import { CertificadoModule } from './certificado/certificado.module';
 import { User } from './users/entities/user.entity';
 import { Company } from './companies/entities/company.entity';
 import { Cadastro } from './cadastros/entities/cadastro.entity';
@@ -24,6 +25,7 @@ import { ConfiguracaoImpostoEstado } from './natureza-operacao/entities/configur
 import { PedidoVenda } from './pedidos-venda/entities/pedido-venda.entity';
 import { PedidoVendaItem } from './pedidos-venda/entities/pedido-venda-item.entity';
 import { PrazoPagamento } from './prazos-pagamento/entities/prazo-pagamento.entity';
+import { Certificado } from './certificado/entities/certificado.entity';
 
 @Module({
   imports: [
@@ -37,7 +39,7 @@ import { PrazoPagamento } from './prazos-pagamento/entities/prazo-pagamento.enti
       username: process.env.DB_USERNAME || 'fenix_user',
       password: process.env.DB_PASSWORD || 'fenix_password',
       database: process.env.DB_DATABASE || 'fenix_db',
-      entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento],
+      entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado],
       synchronize: process.env.NODE_ENV === 'development',
       logging: process.env.NODE_ENV === 'development',
     }),
@@ -51,6 +53,7 @@ import { PrazoPagamento } from './prazos-pagamento/entities/prazo-pagamento.enti
     PedidosVendaModule,
     ImpostosModule,
     PrazosPagamentoModule,
+    CertificadoModule,
   ],
   controllers: [AppController, TestSimpleController],
   providers: [AppService],
