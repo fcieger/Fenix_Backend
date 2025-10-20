@@ -77,11 +77,29 @@ export class CertificadoV2Controller {
       const certificados = await this.certificadoService.findByCompany(companyId);
       return {
         success: true,
-        certificados: certificados.map(cert => this.certificadoService['mapToResponse'](cert))
+        certificados: certificados.map(cert => ({
+          id: cert.id,
+          nomeRazaoSocial: cert.nomeRazaoSocial,
+          cnpj: cert.cnpj,
+          validade: cert.validade.toISOString(),
+          tipo: cert.tipo,
+          status: cert.status,
+          nomeArquivo: cert.nomeArquivo,
+          tamanhoArquivo: this.formatFileSize(cert.tamanhoArquivo),
+          dataUpload: cert.dataUpload.toISOString(),
+          observacoes: cert.observacoes
+        }))
       };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  private formatFileSize(bytes: number): string {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 Bytes';
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   }
 
   @Delete(':id')
