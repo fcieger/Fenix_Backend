@@ -22,8 +22,8 @@ export class CadastrosController {
         throw new Error('Usuário não possui empresas associadas');
       }
       
-      // Usar companyId do frontend se existir, senão usar da primeira empresa do usuário
-      const companyId = createCadastroDto.companyId || req.user.companies[0].id;
+      // Usar companyId do frontend se existir, senão usar da empresa ativa do usuário
+      const companyId = createCadastroDto.companyId || req.user.activeCompanyId;
       console.log('CompanyId final:', companyId);
       
       // Remover companyId e userId do DTO antes de salvar (para evitar duplicação)
@@ -42,22 +42,26 @@ export class CadastrosController {
 
   @Get()
   async findAll(@Request() req) {
-    return await this.cadastrosService.findAll(req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    return await this.cadastrosService.findAll(companyId);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string, @Request() req) {
-    return await this.cadastrosService.findOne(id, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    return await this.cadastrosService.findOne(id, companyId);
   }
 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateCadastroDto: Partial<CreateCadastroDto>, @Request() req) {
-    return await this.cadastrosService.update(id, updateCadastroDto, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    return await this.cadastrosService.update(id, updateCadastroDto, companyId);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req) {
-    await this.cadastrosService.remove(id, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    await this.cadastrosService.remove(id, companyId);
     return { message: 'Cadastro removido com sucesso' };
   }
 }
