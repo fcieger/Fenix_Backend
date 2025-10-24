@@ -6,12 +6,14 @@ import { AccessLogInterceptor } from './user-access-logs/interceptors/access-log
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Configurar CORS
+  // Configurar CORS dinamicamente
+  const corsOrigins = process.env.CORS_ORIGIN?.split(',') || [
+    'http://localhost:3004', // ambiente local do frontend
+    'https://fenix-frontend.vercel.app', // domínio real do frontend no Vercel
+  ];
+  
   app.enableCors({
-    origin: [
-      'http://localhost:3004', // ambiente local do frontend
-      'https://fenix-frontend.vercel.app', // domínio real do frontend no Vercel
-    ],
+    origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
