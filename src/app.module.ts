@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { TestSimpleController } from './test-simple.controller';
 import { HealthController } from './health/health.controller';
 import { SimpleHealthController } from './health/simple-health.controller';
+import { TestRoutesController } from './test-routes.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -68,7 +69,7 @@ import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
     NfeModule,
     NfeIntegrationModule,
   ],
-  controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController],
+  controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController, TestRoutesController],
   providers: [AppService],
 })
 export class AppModule {}
