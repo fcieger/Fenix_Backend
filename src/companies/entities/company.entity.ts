@@ -19,7 +19,7 @@ export class Company {
   @Column({ unique: true })
   cnpj: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column({ unique: true })
@@ -73,6 +73,9 @@ export class Company {
     role: string;
     type: string;
   }>;
+
+  @Column({ default: false })
+  simplesNacional: boolean;
 
   @ManyToMany(() => User, (user) => user.companies)
   users: User[];
