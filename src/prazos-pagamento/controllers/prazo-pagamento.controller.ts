@@ -25,19 +25,19 @@ export class PrazoPagamentoController {
 
   @Post()
   create(@Body() createDto: CreatePrazoPagamentoDto, @Request() req) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.create(createDto, companyId);
   }
 
   @Get()
   findAll(@Query() query: QueryPrazoPagamentoDto, @Request() req) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.findAll(query, companyId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.findOne(id, companyId);
   }
 
@@ -47,20 +47,20 @@ export class PrazoPagamentoController {
     @Body() updateDto: UpdatePrazoPagamentoDto,
     @Request() req,
   ) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.update(id, updateDto, companyId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Request() req) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.remove(id, companyId);
   }
 
   @Patch(':id/padrao')
   setDefault(@Param('id') id: string, @Request() req) {
-    const companyId = req.user.companyId;
+    const companyId = req.user.activeCompanyId;
     return this.prazoPagamentoService.setDefault(id, companyId);
   }
 }
