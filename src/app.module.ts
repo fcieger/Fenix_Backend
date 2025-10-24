@@ -5,6 +5,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TestSimpleController } from './test-simple.controller';
+import { HealthController } from './health/health.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
@@ -67,7 +68,7 @@ import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
     NfeModule,
     NfeIntegrationModule,
   ],
-  controllers: [AppController, TestSimpleController],
+  controllers: [AppController, TestSimpleController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
