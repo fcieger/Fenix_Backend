@@ -50,7 +50,7 @@ import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
         url: process.env.DATABASE_URL,
         ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata],
-        synchronize: true, // TEMPORÁRIO: criar tabelas no banco Neon
+        synchronize: process.env.NODE_ENV !== 'production', // true local, false produção
         logging: process.env.NODE_ENV === 'development',
       }),
     }),
