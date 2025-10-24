@@ -65,9 +65,14 @@ export class PedidosVendaService {
     return { data: pedidos, total };
   }
 
-  async findOne(id: string): Promise<PedidoVenda> {
+  async findOne(id: string, companyId?: string): Promise<PedidoVenda> {
+    const whereCondition: any = { id };
+    if (companyId) {
+      whereCondition.companyId = companyId;
+    }
+
     const pedido = await this.pedidoVendaRepository.findOne({
-      where: { id },
+      where: whereCondition,
       relations: ['cliente', 'vendedor', 'naturezaOperacao', 'prazoPagamento', 'itens', 'itens.produto', 'itens.naturezaOperacao'],
     });
 
