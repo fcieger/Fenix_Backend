@@ -33,4 +33,9 @@ export class AuthController {
   async validateToken(@Body('token') token: string) {
     return this.authService.validateToken(token);
   }
+
+  @Post('reset-password')
+  async resetPassword(@Body('email') email: string, @Body('newPassword') newPassword: string) {
+    return this.authService.resetPassword(email, newPassword);
+  }
 }
