@@ -23,7 +23,7 @@ export class PedidosVendaController {
 
   @Post()
   create(@Body() createPedidoDto: CreatePedidoVendaDto, @Request() req) {
-    return this.pedidosVendaService.create(createPedidoDto, req.user.companyId);
+    return this.pedidosVendaService.create(createPedidoDto, req.user.activeCompanyId);
   }
 
   @Get()
@@ -34,12 +34,12 @@ export class PedidosVendaController {
   ) {
     const pageNumber = page ? parseInt(page, 10) : 1;
     const limitNumber = limit ? parseInt(limit, 10) : 10;
-    return this.pedidosVendaService.findAll(req.user.companyId, pageNumber, limitNumber);
+    return this.pedidosVendaService.findAll(req.user.activeCompanyId, pageNumber, limitNumber);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pedidosVendaService.findOne(id);
+  findOne(@Param('id') id: string, @Request() req) {
+    return this.pedidosVendaService.findOne(id, req.user.activeCompanyId);
   }
 
   @Patch(':id')
@@ -48,7 +48,7 @@ export class PedidosVendaController {
     @Body() updatePedidoDto: UpdatePedidoVendaDto,
     @Request() req,
   ) {
-    return this.pedidosVendaService.update(id, updatePedidoDto, req.user.companyId);
+    return this.pedidosVendaService.update(id, updatePedidoDto, req.user.activeCompanyId);
   }
 
   @Patch(':id/status')
@@ -57,21 +57,21 @@ export class PedidosVendaController {
     @Body() updateStatusDto: UpdateStatusPedidoDto,
     @Request() req,
   ) {
-    return this.pedidosVendaService.updateStatus(id, updateStatusDto, req.user.companyId);
+    return this.pedidosVendaService.updateStatus(id, updateStatusDto, req.user.activeCompanyId);
   }
 
   @Post(':id/clonar')
   clonar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.clonar(id, req.user.companyId);
+    return this.pedidosVendaService.clonar(id, req.user.activeCompanyId);
   }
 
   @Patch(':id/cancelar')
   cancelar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.cancelar(id, req.user.companyId);
+    return this.pedidosVendaService.cancelar(id, req.user.activeCompanyId);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.remove(id, req.user.companyId);
+    return this.pedidosVendaService.remove(id, req.user.activeCompanyId);
   }
 }
