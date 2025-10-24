@@ -1,0 +1,6 @@
+export enum Finalidade {
+  NORMAL = 'NORMAL',
+  COMPLEMENTAR = 'COMPLEMENTAR',
+  AJUSTE = 'AJUSTE',
+  DEVOLUCAO = 'DEVOLUCAO',
+}
