@@ -9,7 +9,7 @@ async function bootstrap() {
   // Configurar CORS dinamicamente
   const corsOrigins = process.env.CORS_ORIGIN?.split(',') || [
     'http://localhost:3004', // ambiente local do frontend
-    'https://fenix-frontend.vercel.app', // domínio real do frontend no Vercel
+    'https://fenixfrontendatual.vercel.app', // domínio real do frontend no Vercel
   ];
   
   app.enableCors({
