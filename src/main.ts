@@ -8,8 +8,11 @@ async function bootstrap() {
   
   // Configurar CORS
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3004', 'http://localhost:8080'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    origin: [
+      'http://localhost:3004', // ambiente local do frontend
+      'https://fenix-frontend.vercel.app', // domínio real do frontend no Vercel
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 
