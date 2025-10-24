@@ -8,6 +8,13 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Post()
+  async createCompany(@Body() createCompanyDto: CreateCompanyDto, @Request() req) {
+    const userId = req.user.id;
+    return await this.companiesService.create(createCompanyDto, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('my-companies')
   getMyCompanies(@Request() req) {
     return req.user.companies;
