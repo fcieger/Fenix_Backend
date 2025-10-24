@@ -58,4 +58,17 @@ export class AuthService {
     }
     return company;
   }
+
+  async resetPassword(email: string, newPassword: string) {
+    const user = await this.usersService.resetPasswordByEmail(email, newPassword);
+    
+    return {
+      message: 'Senha resetada com sucesso',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
 }
