@@ -21,21 +21,7 @@ import { CertificadosModule } from './certificados/certificados.module';
 import { ConfiguracaoNfeModule } from './configuracao-nfe/configuracao-nfe.module';
 import { NfeModule } from './nfe/nfe.module';
 import { NfeIntegrationModule } from './nfe-integration/nfe-integration.module';
-import { User } from './users/entities/user.entity';
-import { Company } from './companies/entities/company.entity';
-import { Cadastro } from './cadastros/entities/cadastro.entity';
-import { Produto } from './produtos/entities/produto.entity';
-import { UserAccessLog } from './user-access-logs/entities/user-access-log.entity';
-import { NaturezaOperacao } from './natureza-operacao/entities/natureza-operacao.entity';
-import { ConfiguracaoImpostoEstado } from './natureza-operacao/entities/configuracao-imposto-estado.entity';
-import { PedidoVenda } from './pedidos-venda/entities/pedido-venda.entity';
-import { PedidoVendaItem } from './pedidos-venda/entities/pedido-venda-item.entity';
-import { PrazoPagamento } from './prazos-pagamento/entities/prazo-pagamento.entity';
-import { Certificado } from './certificados/entities/certificado.entity';
-import { ConfiguracaoNfe } from './configuracao-nfe/entities/configuracao-nfe.entity';
-import { Nfe } from './nfe/entities/nfe.entity';
-import { NfeItem } from './nfe/entities/nfe-item.entity';
-import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
+// Entities are now auto-loaded with autoLoadEntities: true
 
 @Module({
   imports: [
@@ -43,16 +29,15 @@ import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
       isGlobal: true,
     }),
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USERNAME || 'fenix_user',
-      password: process.env.DB_PASSWORD || 'fenix_password',
-      database: process.env.DB_DATABASE || 'fenix_db',
-      entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata],
-      synchronize: process.env.NODE_ENV === 'development',
-      logging: process.env.NODE_ENV === 'development',
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        url: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        autoLoadEntities: true,
+        synchronize: process.env.NODE_ENV !== 'production', // true local, false produção
+        logging: process.env.NODE_ENV === 'development',
+      }),
     }),
     AuthModule,
     UsersModule,
