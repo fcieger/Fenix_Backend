@@ -20,42 +20,36 @@ export class ProdutosController {
   @Post()
   @UseGuards(JwtAuthGuard)
   async create(@Body() createProdutoDto: CreateProdutoDto, @Request() req) {
-    // Adicionar companyId do usuário autenticado (primeira empresa)
-    if (!req.user.companies || req.user.companies.length === 0) {
-      throw new Error('Usuário não possui empresas associadas');
-    }
-    
-    const companyId = req.user.companies[0].id;
+    const companyId = req.user.activeCompanyId;
     return await this.produtosService.create(createProdutoDto, companyId);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async findAll(@Request() req) {
-    // Temporariamente sem autenticação para teste
-    if (req.user && req.user.companies && req.user.companies.length > 0) {
-      return await this.produtosService.findAll(req.user.companies[0].id);
-    } else {
-      // Retornar produtos de uma empresa específica para teste
-      return await this.produtosService.findAll('2c650c76-4e2a-4b58-933c-c3f8b7434d80'); // Hardcoded companyId for testing
-    }
+    const companyId = req.user.activeCompanyId;
+    return await this.produtosService.findAll(companyId);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async findOne(@Param('id') id: string, @Request() req) {
-    return await this.produtosService.findOne(id, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    return await this.produtosService.findOne(id, companyId);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   async update(@Param('id') id: string, @Body() updateProdutoDto: Partial<CreateProdutoDto>, @Request() req) {
-    return await this.produtosService.update(id, updateProdutoDto, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    return await this.produtosService.update(id, updateProdutoDto, companyId);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string, @Request() req) {
-    await this.produtosService.remove(id, req.user.companies[0].id);
+    const companyId = req.user.activeCompanyId;
+    await this.produtosService.remove(id, companyId);
     return { message: 'Produto removido com sucesso' };
   }
 }
