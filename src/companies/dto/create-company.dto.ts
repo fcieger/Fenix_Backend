@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, Matches, IsOptional, IsObject, IsArray } from 'class-validator';
+import { IsString, IsNotEmpty, Matches, IsOptional, IsObject, IsArray, IsBoolean } from 'class-validator';
 
 export class CreateCompanyDto {
   @IsString()
@@ -9,8 +9,8 @@ export class CreateCompanyDto {
   cnpj: string;
 
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   // Dados adicionais da consulta CNPJ
   @IsOptional()
@@ -66,4 +66,8 @@ export class CreateCompanyDto {
     role: string;
     type: string;
   }>;
+
+  @IsOptional()
+  @IsBoolean()
+  simplesNacional?: boolean;
 }
