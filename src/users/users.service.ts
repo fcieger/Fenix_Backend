@@ -72,4 +72,18 @@ export class UsersService {
     const lastLogin = await this.getLastAccess(userId);
     return { ...user, lastLogin };
   }
+
+  async resetPasswordByEmail(email: string, newPassword: string): Promise<User> {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    // Hash da nova senha
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Atualizar senha
+    user.password = hashedPassword;
+    return this.usersRepository.save(user);
+  }
 }
