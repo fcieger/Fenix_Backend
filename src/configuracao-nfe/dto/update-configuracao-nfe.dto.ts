@@ -18,3 +18,6 @@ export class UpdateConfiguracaoNfeDto extends PartialType(CreateConfiguracaoNfeD
 
 
 
+
+
+
