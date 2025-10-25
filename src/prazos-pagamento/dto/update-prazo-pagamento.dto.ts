@@ -21,3 +21,6 @@ export class UpdatePrazoPagamentoDto extends PartialType(CreatePrazoPagamentoDto
 
 
 
+
+
+
