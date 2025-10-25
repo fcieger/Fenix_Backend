@@ -15,3 +15,6 @@ export class AddSimplesNacionalToCompany1761013200000 implements MigrationInterf
 
 
 
+
+
+
