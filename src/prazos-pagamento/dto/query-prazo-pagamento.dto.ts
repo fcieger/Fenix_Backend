@@ -1,4 +1,11 @@
-import { IsOptional, IsNumber, IsString, IsEnum, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsString,
+  IsEnum,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryPrazoPagamentoDto {
@@ -31,25 +38,3 @@ export class QueryPrazoPagamentoDto {
   @Type(() => Boolean)
   padrao?: boolean;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
