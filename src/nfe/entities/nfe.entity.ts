@@ -4,9 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
   OneToMany,
-  JoinColumn,
 } from 'typeorm';
 import { NfeStatus } from '../enums/nfe-status.enum';
 import { TipoOperacao } from '../enums/tipo-operacao.enum';
@@ -159,12 +157,6 @@ export class Nfe {
   @Column('timestamp', { nullable: true })
   dataAutorizacao: Date;
 
-  @Column('timestamp', { nullable: true })
-  dataCancelamento: Date;
-
-  @Column('text', { nullable: true })
-  justificativaCancelamento: string;
-
   // Valores totais
   @Column('decimal', { precision: 15, scale: 2, default: 0 })
   valorTotalProdutos: number;
@@ -287,7 +279,8 @@ export class Nfe {
   @OneToMany(() => NfeItem, (item) => item.nfe, { cascade: true })
   itens: NfeItem[];
 
-  @OneToMany(() => NfeDuplicata, (duplicata) => duplicata.nfe, { cascade: true })
+  @OneToMany(() => NfeDuplicata, (duplicata) => duplicata.nfe, {
+    cascade: true,
+  })
   duplicatas: NfeDuplicata[];
 }
-
