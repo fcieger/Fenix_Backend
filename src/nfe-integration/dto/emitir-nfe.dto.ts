@@ -9,11 +9,3 @@ export class EmitirNFeDto {
   @IsString()
   observacoes?: string;
 }
-
-
-
-
-
-
-
-
