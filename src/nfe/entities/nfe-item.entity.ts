@@ -129,4 +129,3 @@ export class NfeItem {
   @JoinColumn({ name: 'nfeId' })
   nfe: Nfe;
 }
-
