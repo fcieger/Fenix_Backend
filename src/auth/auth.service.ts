@@ -38,10 +38,10 @@ export class AuthService {
   async register(userData: any, companyData: any) {
     // Criar usuário
     const user = await this.usersService.create(userData);
-    
+
     // Criar empresa
     const company = await this.companiesService.create(companyData, user);
-    
+
     // Associar usuário à empresa e salvar
     user.companies = [company];
     await this.usersService.save(user);
@@ -57,18 +57,5 @@ export class AuthService {
       throw new UnauthorizedException('Token inválido');
     }
     return company;
-  }
-
-  async resetPassword(email: string, newPassword: string) {
-    const user = await this.usersService.resetPasswordByEmail(email, newPassword);
-    
-    return {
-      message: 'Senha resetada com sucesso',
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      }
-    };
   }
 }
