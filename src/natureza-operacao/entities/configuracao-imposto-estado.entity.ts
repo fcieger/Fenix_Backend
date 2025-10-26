@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { NaturezaOperacao } from './natureza-operacao.entity';
 
 @Entity('configuracao_imposto_estado')
@@ -22,11 +30,11 @@ export class ConfiguracaoImpostoEstado {
   @Column({ length: 255, nullable: true })
   naturezaOperacaoDescricao: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: ['interna', 'interestadual', 'exterior'], 
+  @Column({
+    type: 'enum',
+    enum: ['interna', 'interestadual', 'exterior'],
     default: 'interna',
-    nullable: true 
+    nullable: true,
   })
   localDestinoOperacao: 'interna' | 'interestadual' | 'exterior';
 
@@ -311,7 +319,6 @@ export class ConfiguracaoImpostoEstado {
   @Column({ default: false })
   ipiDebita: boolean;
 
-
   @Column({ default: false })
   ipiImportacao: boolean;
 
@@ -416,8 +423,3 @@ export class ConfiguracaoImpostoEstado {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-
-
-
-
-                                                                        
