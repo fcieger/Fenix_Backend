@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Nfe } from './entities/nfe.entity';
@@ -30,7 +34,10 @@ export class NfeService {
   /**
    * Criar nova NFe (rascunho)
    */
-  async create(companyId: string, createDto: CreateNfeDto): Promise<NfeResponseDto> {
+  async create(
+    companyId: string,
+    createDto: CreateNfeDto,
+  ): Promise<NfeResponseDto> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -44,14 +51,15 @@ export class NfeService {
           itensCount: createDto.itens.length,
           destinatarioUF: createDto.destinatarioUF,
           destinatarioTipo: createDto.destinatarioTipo,
-        }
+        },
       });
 
       // Buscar configuração NFe
-      const configuracao = await this.configuracaoNfeService.findOneWithCredentials(
-        createDto.configuracaoNfeId,
-        companyId
-      );
+      const configuracao =
+        await this.configuracaoNfeService.findOneWithCredentials(
+          createDto.configuracaoNfeId,
+          companyId,
+        );
 
       if (!configuracao.ativo) {
         throw new BadRequestException('Configuração de NFe está inativa.');
@@ -60,7 +68,7 @@ export class NfeService {
       // Incrementar número da NFe
       const numeroNfe = await this.configuracaoNfeService.incrementarNumero(
         createDto.configuracaoNfeId,
-        companyId
+        companyId,
       );
 
       // Calcular impostos se não foram fornecidos
@@ -204,7 +212,7 @@ export class NfeService {
 
       // Criar duplicatas se fornecidas
       if (createDto.duplicatas?.length) {
-        const duplicatas = createDto.duplicatas.map(dupDto => {
+        const duplicatas = createDto.duplicatas.map((dupDto) => {
           return this.nfeDuplicataRepository.create({
             nfeId: savedNfe.id,
             numero: dupDto.numero,
@@ -224,7 +232,9 @@ export class NfeService {
         relations: ['itens', 'duplicatas'],
       });
 
-      return plainToClass(NfeResponseDto, nfeCompleta, { excludeExtraneousValues: true });
+      return plainToClass(NfeResponseDto, nfeCompleta, {
+        excludeExtraneousValues: true,
+      });
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.error('❌ Erro ao criar NFe:', error);
@@ -239,19 +249,19 @@ export class NfeService {
    */
   async findAll(companyId: string, filters?: any) {
     console.log('🔧 Debug findAll - companyId recebido:', companyId);
-    
+
     // Consulta SQL direta para debug
     console.log('🔧 Debug findAll - Executando consulta SQL direta');
     const nfes = await this.nfeRepository.query(
       'SELECT id, "companyId", "numeroNfe", status, "dataEmissao", "valorTotalNota", "destinatarioRazaoSocial", "destinatarioCnpjCpf", "destinatarioUF" FROM nfe WHERE "companyId" = $1 ORDER BY "dataEmissao" DESC',
-      [companyId]
+      [companyId],
     );
-    
+
     console.log('🔧 Debug findAll - NFes encontradas:', nfes.length);
     console.log('🔧 Debug findAll - Dados brutos:', nfes);
-    
+
     // Retornar dados reais do banco
-    return nfes.map(nfe => ({
+    return nfes.map((nfe) => ({
       id: nfe.id,
       companyId: nfe.companyId,
       numeroNfe: nfe.numeroNfe,
@@ -261,7 +271,7 @@ export class NfeService {
       destinatarioRazaoSocial: nfe.destinatarioRazaoSocial,
       destinatarioCnpjCpf: nfe.destinatarioCnpjCpf,
       destinatarioUF: nfe.destinatarioUF,
-      itens: []
+      itens: [],
     }));
   }
 
@@ -284,7 +294,11 @@ export class NfeService {
   /**
    * Atualizar NFe
    */
-  async update(id: string, companyId: string, updateDto: UpdateNfeDto): Promise<NfeResponseDto> {
+  async update(
+    id: string,
+    companyId: string,
+    updateDto: UpdateNfeDto,
+  ): Promise<NfeResponseDto> {
     const nfe = await this.nfeRepository.findOne({
       where: { id, companyId },
       relations: ['itens', 'duplicatas'],
@@ -295,7 +309,9 @@ export class NfeService {
     }
 
     if (nfe.status !== NfeStatus.RASCUNHO) {
-      throw new BadRequestException('Apenas NFes em rascunho podem ser editadas.');
+      throw new BadRequestException(
+        'Apenas NFes em rascunho podem ser editadas.',
+      );
     }
 
     // Atualizar campos da NFe
@@ -325,7 +341,7 @@ export class NfeService {
       await this.nfeDuplicataRepository.delete({ nfeId: id });
 
       // Criar novas duplicatas
-      const duplicatas = updateDto.duplicatas.map(dupDto => {
+      const duplicatas = updateDto.duplicatas.map((dupDto) => {
         return this.nfeDuplicataRepository.create({
           nfeId: id,
           ...dupDto,
@@ -343,7 +359,9 @@ export class NfeService {
       relations: ['itens', 'duplicatas'],
     });
 
-    return plainToClass(NfeResponseDto, nfeCompleta, { excludeExtraneousValues: true });
+    return plainToClass(NfeResponseDto, nfeCompleta, {
+      excludeExtraneousValues: true,
+    });
   }
 
   /**
@@ -359,7 +377,9 @@ export class NfeService {
     }
 
     if (nfe.status !== NfeStatus.RASCUNHO) {
-      throw new BadRequestException('Apenas NFes em rascunho podem ser deletadas.');
+      throw new BadRequestException(
+        'Apenas NFes em rascunho podem ser deletadas.',
+      );
     }
 
     await this.nfeRepository.remove(nfe);
@@ -388,7 +408,7 @@ export class NfeService {
       // Calcular totais dos itens
       for (const item of calcularDto.itens) {
         valorTotalProdutos += item.valorTotal;
-        
+
         // Cálculo simples de impostos (alíquotas fixas por enquanto)
         const baseICMS = item.valorTotal;
         const aliquotaICMS = 18; // 18% por enquanto
@@ -416,7 +436,8 @@ export class NfeService {
         valorPIS,
         valorCOFINS,
         tributosAproximados: valorICMS + valorIPI + valorPIS + valorCOFINS,
-        valorTotalNota: valorTotalProdutos + valorICMS + valorIPI + valorPIS + valorCOFINS,
+        valorTotalNota:
+          valorTotalProdutos + valorICMS + valorIPI + valorPIS + valorCOFINS,
       };
 
       console.log('✅ Impostos calculados:', resultado);
