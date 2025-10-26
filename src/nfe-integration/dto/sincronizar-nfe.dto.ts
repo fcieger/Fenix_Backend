@@ -5,11 +5,3 @@ export class SincronizarNFeDto {
   @IsUUID()
   nfeId: string;
 }
-
-
-
-
-
-
-
-
