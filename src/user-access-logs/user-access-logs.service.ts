@@ -58,7 +58,10 @@ export class UserAccessLogsService {
     return { logs, total };
   }
 
-  async getAccessStats(userId: string, days: number = 30): Promise<{
+  async getAccessStats(
+    userId: string,
+    days: number = 30,
+  ): Promise<{
     totalAccesses: number;
     uniqueDays: number;
     averageResponseTime: number;
@@ -74,15 +77,17 @@ export class UserAccessLogsService {
       .getMany();
 
     const totalAccesses = logs.length;
-    const uniqueDays = new Set(
-      logs.map(log => log.createdAt.toDateString())
-    ).size;
-    const averageResponseTime = logs.length > 0 
-      ? logs.reduce((sum, log) => sum + log.responseTime, 0) / logs.length 
-      : 0;
-    const lastAccess = logs.length > 0 
-      ? logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0].createdAt 
-      : null;
+    const uniqueDays = new Set(logs.map((log) => log.createdAt.toDateString()))
+      .size;
+    const averageResponseTime =
+      logs.length > 0
+        ? logs.reduce((sum, log) => sum + log.responseTime, 0) / logs.length
+        : 0;
+    const lastAccess =
+      logs.length > 0
+        ? logs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0]
+            .createdAt
+        : null;
 
     return {
       totalAccesses,
