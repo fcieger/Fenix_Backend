@@ -1,21 +1,21 @@
-import { 
-  IsString, 
-  IsUUID, 
-  IsBoolean, 
-  IsEnum, 
-  IsNumber, 
-  IsOptional, 
-  IsDateString, 
-  IsArray, 
-  ValidateNested 
+import {
+  IsString,
+  IsUUID,
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { 
-  StatusPedido, 
-  TipoFrete, 
-  IndicadorPresenca, 
-  FormaPagamento, 
-  TipoEstoque 
+import {
+  StatusPedido,
+  TipoFrete,
+  IndicadorPresenca,
+  FormaPagamento,
+  TipoEstoque,
 } from '../../shared/enums/pedido-venda.enums';
 import { CreatePedidoVendaItemDto } from './create-pedido-venda-item.dto';
 
