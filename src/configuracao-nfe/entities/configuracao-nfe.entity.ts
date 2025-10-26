@@ -9,7 +9,10 @@ import {
   Index,
 } from 'typeorm';
 import { Company } from '../../companies/entities/company.entity';
-import { TipoModeloNfe, AmbienteNfe } from '../../shared/enums/configuracao-nfe.enums';
+import {
+  TipoModeloNfe,
+  AmbienteNfe,
+} from '../../shared/enums/configuracao-nfe.enums';
 
 @Entity('configuracao_nfe')
 @Index(['companyId', 'modelo', 'serie'], { unique: true })
@@ -78,7 +81,13 @@ export class ConfiguracaoNfe {
   @Column({ name: 'rps_senha_prefeitura', nullable: true })
   rpsSenhaPrefeitura: string; // Armazenado criptografado
 
-  @Column({ name: 'rps_aliquota_iss', type: 'decimal', precision: 5, scale: 2, default: 0 })
+  @Column({
+    name: 'rps_aliquota_iss',
+    type: 'decimal',
+    precision: 5,
+    scale: 2,
+    default: 0,
+  })
   rpsAliquotaISS: number;
 
   @Column({ name: 'rps_enviar_notificacao_cliente', default: false })
@@ -104,22 +113,3 @@ export class ConfiguracaoNfe {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
