@@ -12,22 +12,3 @@ import { ConfiguracaoNfeController } from './configuracao-nfe.controller';
   exports: [ConfiguracaoNfeService],
 })
 export class ConfiguracaoNfeModule {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
