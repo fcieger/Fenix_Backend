@@ -6,10 +6,7 @@ import { User } from './entities/user.entity';
 import { UserAccessLogsModule } from '../user-access-logs/user-access-logs.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User]),
-    UserAccessLogsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User]), UserAccessLogsModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
