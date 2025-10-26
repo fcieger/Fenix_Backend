@@ -1,4 +1,15 @@
-import { IsString, IsBoolean, IsNumber, IsOptional, IsArray, ValidateNested, Min, Max, IsNotEmpty, ValidateIf } from 'class-validator';
+import {
+  IsString,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  Min,
+  Max,
+  IsNotEmpty,
+  ValidateIf,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ImpostoPersonalizadoDto {
@@ -454,7 +465,6 @@ export class ConfiguracaoEstadoDto {
   @IsBoolean()
   @IsOptional()
   ipiDebita?: boolean;
-
 
   @IsBoolean()
   @IsOptional()
