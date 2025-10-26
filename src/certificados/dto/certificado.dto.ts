@@ -1,4 +1,12 @@
-import { IsString, IsEnum, IsOptional, IsDateString, IsUUID, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsDateString,
+  IsUUID,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateCertificadoDto {
   @IsString()
