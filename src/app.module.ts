@@ -22,7 +22,6 @@ import { CertificadosModule } from './certificados/certificados.module';
 import { ConfiguracaoNfeModule } from './configuracao-nfe/configuracao-nfe.module';
 import { NfeModule } from './nfe/nfe.module';
 import { NfeIntegrationModule } from './nfe-integration/nfe-integration.module';
-import { ContasFinanceirasModule } from './financeiro/contas-financeiras/contas-financeiras.module';
 import { User } from './users/entities/user.entity';
 import { Company } from './companies/entities/company.entity';
 import { Cadastro } from './cadastros/entities/cadastro.entity';
@@ -38,7 +37,6 @@ import { ConfiguracaoNfe } from './configuracao-nfe/entities/configuracao-nfe.en
 import { Nfe } from './nfe/entities/nfe.entity';
 import { NfeItem } from './nfe/entities/nfe-item.entity';
 import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
-import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-financeira.entity';
 
 @Module({
   imports: [
@@ -50,8 +48,27 @@ import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-
       useFactory: () => ({
         type: 'postgres',
         url: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-        entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira],
+        ssl:
+          process.env.NODE_ENV === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
+        entities: [
+          User,
+          Company,
+          Cadastro,
+          Produto,
+          UserAccessLog,
+          NaturezaOperacao,
+          ConfiguracaoImpostoEstado,
+          PedidoVenda,
+          PedidoVendaItem,
+          PrazoPagamento,
+          Certificado,
+          ConfiguracaoNfe,
+          Nfe,
+          NfeItem,
+          NfeDuplicata,
+        ],
         synchronize: process.env.NODE_ENV !== 'production', // true local, false produção
         logging: process.env.NODE_ENV === 'development',
       }),
@@ -70,9 +87,14 @@ import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-
     ConfiguracaoNfeModule,
     NfeModule,
     NfeIntegrationModule,
-    ContasFinanceirasModule,
   ],
-  controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController, TestRoutesController],
+  controllers: [
+    AppController,
+    TestSimpleController,
+    HealthController,
+    SimpleHealthController,
+    TestRoutesController,
+  ],
   providers: [AppService],
 })
 export class AppModule {}
