@@ -13,12 +13,12 @@ import { NaturezaOperacao } from '../../natureza-operacao/entities/natureza-oper
 import { PrazoPagamento } from '../../prazos-pagamento/entities/prazo-pagamento.entity';
 import { Company } from '../../companies/entities/company.entity';
 import { PedidoVendaItem } from './pedido-venda-item.entity';
-import { 
-  StatusPedido, 
-  TipoFrete, 
-  IndicadorPresenca, 
-  FormaPagamento, 
-  TipoEstoque 
+import {
+  StatusPedido,
+  TipoFrete,
+  IndicadorPresenca,
+  FormaPagamento,
+  TipoEstoque,
 } from '../../shared/enums/pedido-venda.enums';
 import { EnumHelper } from '../../shared/helpers/enum.helpers';
 
@@ -171,7 +171,9 @@ export class PedidoVenda {
   company: Company;
 
   // Relacionamento com Itens
-  @OneToMany(() => PedidoVendaItem, item => item.pedidoVenda, { cascade: true })
+  @OneToMany(() => PedidoVendaItem, (item) => item.pedidoVenda, {
+    cascade: true,
+  })
   itens: PedidoVendaItem[];
 
   @CreateDateColumn()
@@ -190,11 +192,17 @@ export class PedidoVenda {
   }
 
   get presencaLabel(): string {
-    return EnumHelper.getLabel(this.indicadorPresenca, EnumHelper.PRESENCA_LABELS);
+    return EnumHelper.getLabel(
+      this.indicadorPresenca,
+      EnumHelper.PRESENCA_LABELS,
+    );
   }
 
   get pagamentoLabel(): string {
-    return EnumHelper.getLabel(this.formaPagamento, EnumHelper.PAGAMENTO_LABELS);
+    return EnumHelper.getLabel(
+      this.formaPagamento,
+      EnumHelper.PAGAMENTO_LABELS,
+    );
   }
 
   get estoqueLabel(): string {
