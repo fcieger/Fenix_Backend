@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like, FindManyOptions } from 'typeorm';
 import { PrazoPagamento } from '../entities/prazo-pagamento.entity';
@@ -13,7 +18,10 @@ export class PrazoPagamentoService {
     private prazoPagamentoRepository: Repository<PrazoPagamento>,
   ) {}
 
-  async create(createDto: CreatePrazoPagamentoDto, companyId: string): Promise<PrazoPagamento> {
+  async create(
+    createDto: CreatePrazoPagamentoDto,
+    companyId: string,
+  ): Promise<PrazoPagamento> {
     // Validar configurações baseadas no tipo
     this.validateConfigurations(createDto.tipo, createDto.configuracoes);
 
@@ -59,7 +67,8 @@ export class PrazoPagamentoService {
       order: { createdAt: 'DESC' },
     };
 
-    const [data, total] = await this.prazoPagamentoRepository.findAndCount(options);
+    const [data, total] =
+      await this.prazoPagamentoRepository.findAndCount(options);
 
     return {
       data,
@@ -82,7 +91,11 @@ export class PrazoPagamentoService {
     return prazo;
   }
 
-  async update(id: string, updateDto: UpdatePrazoPagamentoDto, companyId: string): Promise<PrazoPagamento> {
+  async update(
+    id: string,
+    updateDto: UpdatePrazoPagamentoDto,
+    companyId: string,
+  ): Promise<PrazoPagamento> {
     const prazo = await this.findOne(id, companyId);
 
     // Validar configurações se fornecidas
@@ -106,16 +119,19 @@ export class PrazoPagamentoService {
 
   async setDefault(id: string, companyId: string): Promise<PrazoPagamento> {
     const prazo = await this.findOne(id, companyId);
-    
+
     // Remover padrão de outros prazos
     await this.removeDefaultFromOthers(companyId, id);
-    
+
     // Definir este como padrão
     prazo.padrao = true;
     return await this.prazoPagamentoRepository.save(prazo);
   }
 
-  private async removeDefaultFromOthers(companyId: string, excludeId?: string): Promise<void> {
+  private async removeDefaultFromOthers(
+    companyId: string,
+    excludeId?: string,
+  ): Promise<void> {
     const where: any = { companyId, padrao: true };
     if (excludeId) {
       where.id = { $ne: excludeId };
@@ -134,54 +150,95 @@ export class PrazoPagamentoService {
   private validateConfigurations(tipo: string, configuracoes: any): void {
     switch (tipo) {
       case 'dias':
-        if (configuracoes.dias === undefined || configuracoes.dias === null || configuracoes.dias < 0) {
-          throw new BadRequestException('Dias deve ser um número não negativo (0 para à vista)');
+        if (
+          configuracoes.dias === undefined ||
+          configuracoes.dias === null ||
+          configuracoes.dias < 0
+        ) {
+          throw new BadRequestException(
+            'Dias deve ser um número não negativo (0 para à vista)',
+          );
         }
-        if (configuracoes.percentualEntrada && configuracoes.percentualRestante) {
-          const total = (configuracoes.percentualEntrada || 0) + (configuracoes.percentualRestante || 0);
+        if (
+          configuracoes.percentualEntrada &&
+          configuracoes.percentualRestante
+        ) {
+          const total =
+            (configuracoes.percentualEntrada || 0) +
+            (configuracoes.percentualRestante || 0);
           if (Math.abs(total - 100) > 0.01) {
-            throw new BadRequestException('A soma dos percentuais deve ser 100%');
+            throw new BadRequestException(
+              'A soma dos percentuais deve ser 100%',
+            );
           }
         }
         break;
 
       case 'parcelas':
-        if (!configuracoes.numeroParcelas || configuracoes.numeroParcelas <= 0) {
+        if (
+          !configuracoes.numeroParcelas ||
+          configuracoes.numeroParcelas <= 0
+        ) {
           throw new BadRequestException('Número de parcelas deve ser positivo');
         }
         if (!configuracoes.intervaloDias || configuracoes.intervaloDias <= 0) {
           throw new BadRequestException('Intervalo de dias deve ser positivo');
         }
-        if (configuracoes.percentualEntrada && configuracoes.percentualParcelas) {
-          const total = (configuracoes.percentualEntrada || 0) + 
-                       ((configuracoes.percentualParcelas || 0) * (configuracoes.numeroParcelas || 1));
+        if (
+          configuracoes.percentualEntrada &&
+          configuracoes.percentualParcelas
+        ) {
+          const total =
+            (configuracoes.percentualEntrada || 0) +
+            (configuracoes.percentualParcelas || 0) *
+              (configuracoes.numeroParcelas || 1);
           if (Math.abs(total - 100) > 0.01) {
-            throw new BadRequestException('A soma dos percentuais deve ser 100%');
+            throw new BadRequestException(
+              'A soma dos percentuais deve ser 100%',
+            );
           }
         }
         break;
 
       case 'personalizado':
-        if (!configuracoes.parcelas || !Array.isArray(configuracoes.parcelas) || configuracoes.parcelas.length === 0) {
-          throw new BadRequestException('Deve ter pelo menos uma parcela para tipo personalizado');
+        if (
+          !configuracoes.parcelas ||
+          !Array.isArray(configuracoes.parcelas) ||
+          configuracoes.parcelas.length === 0
+        ) {
+          throw new BadRequestException(
+            'Deve ter pelo menos uma parcela para tipo personalizado',
+          );
         }
-        
+
         let totalPercentual = 0;
         for (const parcela of configuracoes.parcelas) {
           if (!parcela.numero || parcela.numero <= 0) {
-            throw new BadRequestException('Número da parcela deve ser positivo');
+            throw new BadRequestException(
+              'Número da parcela deve ser positivo',
+            );
           }
           if (!parcela.dias || parcela.dias < 0) {
-            throw new BadRequestException('Dias da parcela deve ser não negativo');
+            throw new BadRequestException(
+              'Dias da parcela deve ser não negativo',
+            );
           }
-          if (!parcela.percentual || parcela.percentual <= 0 || parcela.percentual > 100) {
-            throw new BadRequestException('Percentual da parcela deve estar entre 0 e 100');
+          if (
+            !parcela.percentual ||
+            parcela.percentual <= 0 ||
+            parcela.percentual > 100
+          ) {
+            throw new BadRequestException(
+              'Percentual da parcela deve estar entre 0 e 100',
+            );
           }
           totalPercentual += parcela.percentual;
         }
-        
+
         if (Math.abs(totalPercentual - 100) > 0.01) {
-          throw new BadRequestException('A soma dos percentuais das parcelas deve ser 100%');
+          throw new BadRequestException(
+            'A soma dos percentuais das parcelas deve ser 100%',
+          );
         }
         break;
 
