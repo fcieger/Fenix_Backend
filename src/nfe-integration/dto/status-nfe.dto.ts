@@ -20,11 +20,3 @@ export class StatusNFeDto {
   @IsString()
   ultimaAtualizacao?: string;
 }
-
-
-
-
-
-
-
-
