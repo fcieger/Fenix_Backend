@@ -28,11 +28,3 @@ export class WebhookNFeDto {
   @IsObject()
   erros?: any[];
 }
-
-
-
-
-
-
-
-
