@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, Length, Matches, IsEnum, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  Length,
+  Matches,
+  IsEnum,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateNaturezaOperacaoDto {
   @IsString()
@@ -11,7 +19,16 @@ export class CreateNaturezaOperacaoDto {
   @Matches(/^\d{4}$/, { message: 'CFOP deve conter exatamente 4 dígitos' })
   cfop: string;
 
-  @IsEnum(['compras', 'vendas', 'servicos', 'cupom_fiscal', 'ecommerce', 'devolucao_vendas', 'devolucao_compras', 'outras_movimentacoes'])
+  @IsEnum([
+    'compras',
+    'vendas',
+    'servicos',
+    'cupom_fiscal',
+    'ecommerce',
+    'devolucao_vendas',
+    'devolucao_compras',
+    'outras_movimentacoes',
+  ])
   @IsNotEmpty()
   tipo: string;
 
