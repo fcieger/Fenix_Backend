@@ -11,10 +11,13 @@ export class ProdutosService {
     private produtosRepository: Repository<Produto>,
   ) {}
 
-  async create(createProdutoDto: CreateProdutoDto, companyId: string): Promise<Produto> {
+  async create(
+    createProdutoDto: CreateProdutoDto,
+    companyId: string,
+  ): Promise<Produto> {
     const produto = this.produtosRepository.create({
       ...createProdutoDto,
-      companyId
+      companyId,
     });
     return await this.produtosRepository.save(produto);
   }
@@ -22,17 +25,21 @@ export class ProdutosService {
   async findAll(companyId: string): Promise<Produto[]> {
     return await this.produtosRepository.find({
       where: { companyId },
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
   }
 
   async findOne(id: string, companyId: string): Promise<Produto | null> {
     return await this.produtosRepository.findOne({
-      where: { id, companyId }
+      where: { id, companyId },
     });
   }
 
-  async update(id: string, updateProdutoDto: Partial<CreateProdutoDto>, companyId: string): Promise<Produto | null> {
+  async update(
+    id: string,
+    updateProdutoDto: Partial<CreateProdutoDto>,
+    companyId: string,
+  ): Promise<Produto | null> {
     await this.produtosRepository.update({ id, companyId }, updateProdutoDto);
     return await this.findOne(id, companyId);
   }
