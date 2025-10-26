@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey, TableIndex } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+  TableIndex,
+} from 'typeorm';
 
-export class CreateConfiguracaoNfeTable1761013152000 implements MigrationInterface {
+export class CreateConfiguracaoNfeTable1761013152000
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Criar tabela configuracao_nfe
     await queryRunner.createTable(
@@ -146,7 +154,7 @@ export class CreateConfiguracaoNfeTable1761013152000 implements MigrationInterfa
       WHERE constraint_name = 'FK_2e1e2482305d5b72df55b21a1b2' 
       AND table_name = 'configuracao_nfe'
     `);
-    
+
     if (!foreignKeyExists.length) {
       await queryRunner.createForeignKey(
         'configuracao_nfe',
@@ -181,13 +189,16 @@ export class CreateConfiguracaoNfeTable1761013152000 implements MigrationInterfa
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Remover índices
-    await queryRunner.dropIndex('configuracao_nfe', 'IDX_configuracao_nfe_company_ativo');
-    await queryRunner.dropIndex('configuracao_nfe', 'IDX_configuracao_nfe_company_modelo_serie');
+    await queryRunner.dropIndex(
+      'configuracao_nfe',
+      'IDX_configuracao_nfe_company_ativo',
+    );
+    await queryRunner.dropIndex(
+      'configuracao_nfe',
+      'IDX_configuracao_nfe_company_modelo_serie',
+    );
 
     // Remover tabela (foreign keys são removidas automaticamente)
     await queryRunner.dropTable('configuracao_nfe');
   }
 }
-
-
-
