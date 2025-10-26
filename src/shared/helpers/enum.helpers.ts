@@ -1,9 +1,9 @@
-import { 
-  StatusPedido, 
-  TipoFrete, 
-  IndicadorPresenca, 
-  FormaPagamento, 
-  TipoEstoque 
+import {
+  StatusPedido,
+  TipoFrete,
+  IndicadorPresenca,
+  FormaPagamento,
+  TipoEstoque,
 } from '../enums/pedido-venda.enums';
 
 export class EnumHelper {
@@ -15,14 +15,14 @@ export class EnumHelper {
     [StatusPedido.ENTREGUE]: 'Entregue',
     [StatusPedido.FATURADO]: 'Faturado',
     [StatusPedido.CANCELADO]: 'Cancelado',
-    [StatusPedido.DEVOLVIDO]: 'Devolvido'
+    [StatusPedido.DEVOLVIDO]: 'Devolvido',
   };
 
   static readonly FRETE_LABELS = {
     [TipoFrete.EMITENTE]: 'Por conta do emitente',
     [TipoFrete.DESTINATARIO]: 'Por conta do destinatário',
     [TipoFrete.TERCEIROS]: 'Por conta de terceiros',
-    [TipoFrete.SEM_FRETE]: 'Sem cobrança de frete'
+    [TipoFrete.SEM_FRETE]: 'Sem cobrança de frete',
   };
 
   static readonly PRESENCA_LABELS = {
@@ -32,7 +32,7 @@ export class EnumHelper {
     [IndicadorPresenca.TELEATENDIMENTO]: 'Teleatendimento',
     [IndicadorPresenca.NFCe_DOMICILIO]: 'NFCe entrega em domicílio',
     [IndicadorPresenca.PRESENCIAL_FORA]: 'Presencial fora do estabelecimento',
-    [IndicadorPresenca.OUTROS]: 'Outros'
+    [IndicadorPresenca.OUTROS]: 'Outros',
   };
 
   static readonly PAGAMENTO_LABELS = {
@@ -47,7 +47,7 @@ export class EnumHelper {
     [FormaPagamento.VALE_COMBUSTIVEL]: 'Vale Combustível',
     [FormaPagamento.BOLETO_BANCARIO]: 'Boleto Bancário',
     [FormaPagamento.SEM_PAGAMENTO]: 'Sem pagamento',
-    [FormaPagamento.OUTROS]: 'Outros'
+    [FormaPagamento.OUTROS]: 'Outros',
   };
 
   static readonly ESTOQUE_LABELS = {
@@ -55,14 +55,11 @@ export class EnumHelper {
     [TipoEstoque.RESERVA]: 'Reserva',
     [TipoEstoque.EXIBICAO]: 'Exibição',
     [TipoEstoque.CONSIGNACAO]: 'Consignação',
-    [TipoEstoque.OUTROS]: 'Outros'
+    [TipoEstoque.OUTROS]: 'Outros',
   };
 
   // Métodos genéricos
-  static getLabel(
-    value: number, 
-    labels: Record<number, string>
-  ): string {
+  static getLabel(value: number, labels: Record<number, string>): string {
     return labels[value] || 'Desconhecido';
   }
 
@@ -75,7 +72,7 @@ export class EnumHelper {
       [StatusPedido.ENTREGUE]: 'green',
       [StatusPedido.FATURADO]: 'emerald',
       [StatusPedido.CANCELADO]: 'red',
-      [StatusPedido.DEVOLVIDO]: 'gray'
+      [StatusPedido.DEVOLVIDO]: 'gray',
     };
     return colors[status] || 'gray';
   }
