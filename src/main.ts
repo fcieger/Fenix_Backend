@@ -5,13 +5,13 @@ import { AccessLogInterceptor } from './user-access-logs/interceptors/access-log
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Configurar CORS dinamicamente
   const corsOrigins = process.env.CORS_ORIGIN?.split(',') || [
     'http://localhost:3004', // ambiente local do frontend
     'https://fenixfrontendatual.vercel.app', // domínio real do frontend no Vercel
   ];
-  
+
   app.enableCors({
     origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -19,11 +19,13 @@ async function bootstrap() {
   });
 
   // Configurar validação global
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: false,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      transform: true,
+    }),
+  );
 
   // Configurar interceptor global para logs de acesso
   // const accessLogInterceptor = app.get(AccessLogInterceptor);
@@ -34,7 +36,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3001;
   await app.listen(port);
-  
+
   console.log(`🚀 FENIX Backend rodando na porta ${port}`);
   console.log(`📊 API disponível em: http://localhost:${port}/api`);
 }
