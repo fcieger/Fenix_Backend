@@ -37,4 +37,3 @@ export class NfeDuplicata {
   @JoinColumn({ name: 'nfeId' })
   nfe: Nfe;
 }
-
