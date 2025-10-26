@@ -19,7 +19,9 @@ export class PedidoVendaItem {
   id: string;
 
   // Relacionamento com Pedido
-  @ManyToOne(() => PedidoVenda, pedido => pedido.itens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => PedidoVenda, (pedido) => pedido.itens, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'pedidoVendaId' })
   pedidoVenda: PedidoVenda;
 
