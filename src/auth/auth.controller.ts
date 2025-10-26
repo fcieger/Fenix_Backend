@@ -1,9 +1,16 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { CreateCompanyDto } from '../companies/dto/create-company.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+// import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +30,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @Post('profile')
   getProfile(@Request() req) {
     return req.user;
@@ -32,10 +39,5 @@ export class AuthController {
   @Post('validate-token')
   async validateToken(@Body('token') token: string) {
     return this.authService.validateToken(token);
-  }
-
-  @Post('reset-password')
-  async resetPassword(@Body('email') email: string, @Body('newPassword') newPassword: string) {
-    return this.authService.resetPassword(email, newPassword);
   }
 }
