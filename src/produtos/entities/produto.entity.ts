@@ -173,4 +173,3 @@ export class Produto {
   @UpdateDateColumn()
   updatedAt: Date;
 }
-
