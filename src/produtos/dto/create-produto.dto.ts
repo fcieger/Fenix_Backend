@@ -199,4 +199,3 @@ export class CreateProdutoDto {
   @IsString()
   observacoesTecnicas?: string;
 }
-
