@@ -5,4 +5,3 @@ export enum NfeStatus {
   CANCELADA = 'CANCELADA',
   REJEITADA = 'REJEITADA',
 }
-
