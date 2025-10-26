@@ -7,25 +7,3 @@ export class TestSimpleController {
     return { message: 'Simple test working!' };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
