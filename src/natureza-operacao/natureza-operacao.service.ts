@@ -16,7 +16,10 @@ export class NaturezaOperacaoService {
     private configuracaoImpostoEstadoRepository: Repository<ConfiguracaoImpostoEstado>,
   ) {}
 
-  async create(createDto: CreateNaturezaOperacaoDto, companyId: string): Promise<NaturezaOperacao> {
+  async create(
+    createDto: CreateNaturezaOperacaoDto,
+    companyId: string,
+  ): Promise<NaturezaOperacao> {
     if (!companyId) {
       throw new Error('CompanyId é obrigatório');
     }
@@ -49,37 +52,48 @@ export class NaturezaOperacaoService {
     return naturezaOperacao;
   }
 
-  async update(id: string, updateDto: UpdateNaturezaOperacaoDto, companyId: string): Promise<NaturezaOperacao> {
+  async update(
+    id: string,
+    updateDto: UpdateNaturezaOperacaoDto,
+    companyId: string,
+  ): Promise<NaturezaOperacao> {
     const naturezaOperacao = await this.findOne(id, companyId);
-    
+
     Object.assign(naturezaOperacao, updateDto);
-    
+
     return this.naturezaOperacaoRepository.save(naturezaOperacao);
   }
 
   async remove(id: string, companyId: string): Promise<void> {
     const naturezaOperacao = await this.findOne(id, companyId);
-    
+
     // Deletar configurações de estados relacionadas
-    await this.configuracaoImpostoEstadoRepository.delete({ naturezaOperacaoId: id });
-    
+    await this.configuracaoImpostoEstadoRepository.delete({
+      naturezaOperacaoId: id,
+    });
+
     await this.naturezaOperacaoRepository.remove(naturezaOperacao);
   }
 
-  async getConfiguracaoEstados(naturezaOperacaoId: string, companyId: string): Promise<ConfiguracaoImpostoEstado[]> {
+  async getConfiguracaoEstados(
+    naturezaOperacaoId: string,
+    companyId: string,
+  ): Promise<ConfiguracaoImpostoEstado[]> {
     console.log('=== GET CONFIGURAÇÃO ESTADOS ===');
     console.log('NaturezaOperacaoId:', naturezaOperacaoId);
     console.log('CompanyId:', companyId);
-    
+
     try {
       // Verificar se a natureza de operação pertence à empresa
       await this.findOne(naturezaOperacaoId, companyId);
 
-      const configuracoes = await this.configuracaoImpostoEstadoRepository.find({
-        where: { naturezaOperacaoId },
-        order: { uf: 'ASC' },
-      });
-      
+      const configuracoes = await this.configuracaoImpostoEstadoRepository.find(
+        {
+          where: { naturezaOperacaoId },
+          order: { uf: 'ASC' },
+        },
+      );
+
       console.log('Configurações encontradas:', configuracoes.length);
       return configuracoes;
     } catch (error) {
@@ -89,18 +103,20 @@ export class NaturezaOperacaoService {
   }
 
   async saveConfiguracaoEstados(
-    naturezaOperacaoId: string, 
-    configuracaoEstados: ConfiguracaoEstadoDto[], 
-    companyId: string
+    naturezaOperacaoId: string,
+    configuracaoEstados: ConfiguracaoEstadoDto[],
+    companyId: string,
   ): Promise<void> {
     // Verificar se a natureza de operação pertence à empresa
     await this.findOne(naturezaOperacaoId, companyId);
 
     // Deletar configurações existentes
-    await this.configuracaoImpostoEstadoRepository.delete({ naturezaOperacaoId });
+    await this.configuracaoImpostoEstadoRepository.delete({
+      naturezaOperacaoId,
+    });
 
     // Criar novas configurações
-    const configuracoes = configuracaoEstados.map(config => {
+    const configuracoes = configuracaoEstados.map((config) => {
       return this.configuracaoImpostoEstadoRepository.create({
         ...config,
         naturezaOperacaoId,
@@ -110,7 +126,3 @@ export class NaturezaOperacaoService {
     await this.configuracaoImpostoEstadoRepository.save(configuracoes);
   }
 }
-
-
-
-
