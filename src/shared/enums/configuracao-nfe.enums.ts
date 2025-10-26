@@ -3,13 +3,10 @@ export enum TipoModeloNfe {
   NFSE_SERVICO = 'nfse-servico',
   NF_ENTRADA = 'nf-entrada',
   NFCE_CONSUMIDOR = 'nfce-consumidor',
-  MDFE = 'mdfe'
+  MDFE = 'mdfe',
 }
 
 export enum AmbienteNfe {
   PRODUCAO = 'PRODUCAO',
-  HOMOLOGACAO = 'HOMOLOGACAO'
+  HOMOLOGACAO = 'HOMOLOGACAO',
 }
-
-
-
