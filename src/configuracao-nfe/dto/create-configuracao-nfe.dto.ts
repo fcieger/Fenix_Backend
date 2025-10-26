@@ -1,6 +1,17 @@
-import { IsString, IsEnum, IsNumber, IsBoolean, IsOptional, IsEmail, Min } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+  IsEmail,
+  Min,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { TipoModeloNfe, AmbienteNfe } from '../../shared/enums/configuracao-nfe.enums';
+import {
+  TipoModeloNfe,
+  AmbienteNfe,
+} from '../../shared/enums/configuracao-nfe.enums';
 
 export class CreateConfiguracaoNfeDto {
   // Campos Básicos - Obrigatórios
@@ -85,22 +96,3 @@ export class CreateConfiguracaoNfeDto {
   @IsOptional()
   nfceCscToken?: string;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
