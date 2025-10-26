@@ -5,14 +5,9 @@ import { CertificadosController } from './certificados.controller';
 import { CertificadosService } from './certificados.service';
 import { JavaCertificadoService } from './java-certificado.service';
 import { Certificado } from './entities/certificado.entity';
-import { CompaniesModule } from '../companies/companies.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Certificado]),
-    ConfigModule,
-    CompaniesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Certificado]), ConfigModule],
   controllers: [CertificadosController],
   providers: [CertificadosService, JavaCertificadoService],
   exports: [CertificadosService],
