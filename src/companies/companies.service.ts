@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
@@ -12,7 +16,10 @@ export class CompaniesService {
     private companiesRepository: Repository<Company>,
   ) {}
 
-  async create(createCompanyDto: CreateCompanyDto, owner?: any): Promise<Company> {
+  async create(
+    createCompanyDto: CreateCompanyDto,
+    owner?: any,
+  ): Promise<Company> {
     // Verificar se CNPJ já existe
     const existingCompany = await this.companiesRepository.findOne({
       where: { cnpj: createCompanyDto.cnpj },
@@ -57,7 +64,10 @@ export class CompaniesService {
       .getMany();
   }
 
-  async update(id: string, updateData: Partial<CreateCompanyDto>): Promise<Company | null> {
+  async update(
+    id: string,
+    updateData: Partial<CreateCompanyDto>,
+  ): Promise<Company | null> {
     const company = await this.findById(id);
     if (!company) {
       throw new NotFoundException('Empresa não encontrada');
