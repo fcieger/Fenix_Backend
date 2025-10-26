@@ -14,4 +14,3 @@ export enum MeioPagamento {
   BOLETO_BANCARIO = 'BOLETO_BANCARIO',
   PIX = 'PIX',
 }
-
