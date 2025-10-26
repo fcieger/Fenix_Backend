@@ -26,14 +26,16 @@ export class NFeSyncJob {
     try {
       // Buscar NFe com status PENDENTE
       const nfesPendentes = await this.nfeRepository.find({
-        where: { 
+        where: {
           status: NfeStatus.PENDENTE,
-          chaveAcesso: Not('') // Apenas NFe que já foram enviadas para API
+          chaveAcesso: Not(''), // Apenas NFe que já foram enviadas para API
         },
-        select: ['id', 'companyId', 'chaveAcesso', 'numeroNfe', 'updatedAt']
+        select: ['id', 'companyId', 'chaveAcesso', 'numeroNfe', 'updatedAt'],
       });
 
-      this.logger.log(`Encontradas ${nfesPendentes.length} NFe pendentes para sincronização`);
+      this.logger.log(
+        `Encontradas ${nfesPendentes.length} NFe pendentes para sincronização`,
+      );
 
       if (nfesPendentes.length === 0) {
         this.logger.log('Nenhuma NFe pendente encontrada');
@@ -42,15 +44,18 @@ export class NFeSyncJob {
 
       // Processar cada NFe pendente
       const resultados = await Promise.allSettled(
-        nfesPendentes.map(nfe => this.sincronizarNFeIndividual(nfe))
+        nfesPendentes.map((nfe) => this.sincronizarNFeIndividual(nfe)),
       );
 
       // Contar sucessos e falhas
-      const sucessos = resultados.filter(r => r.status === 'fulfilled').length;
-      const falhas = resultados.filter(r => r.status === 'rejected').length;
+      const sucessos = resultados.filter(
+        (r) => r.status === 'fulfilled',
+      ).length;
+      const falhas = resultados.filter((r) => r.status === 'rejected').length;
 
-      this.logger.log(`Sincronização concluída: ${sucessos} sucessos, ${falhas} falhas`);
-
+      this.logger.log(
+        `Sincronização concluída: ${sucessos} sucessos, ${falhas} falhas`,
+      );
     } catch (error) {
       this.logger.error('Erro na sincronização automática:', error);
     }
@@ -62,29 +67,30 @@ export class NFeSyncJob {
   private async sincronizarNFeIndividual(nfe: Partial<Nfe>): Promise<void> {
     try {
       this.logger.debug(`Sincronizando NFe ${nfe.id} (${nfe.numeroNfe})`);
-      
+
       if (!nfe.id) {
         throw new Error('ID da NFe não encontrado');
       }
-      
-      await this.nfeIntegrationService.sincronizarStatusNFe(nfe.id);
-      
-      this.logger.debug(`NFe ${nfe.id} sincronizada com sucesso`);
 
+      await this.nfeIntegrationService.sincronizarStatusNFe(nfe.id);
+
+      this.logger.debug(`NFe ${nfe.id} sincronizada com sucesso`);
     } catch (error) {
       this.logger.error(`Erro ao sincronizar NFe ${nfe.id}:`, error);
-      
+
       // Se a NFe está há muito tempo em processamento, marcar como erro
       if (nfe.updatedAt) {
         const tempoProcessamento = Date.now() - nfe.updatedAt.getTime();
         const tempoLimite = 30 * 60 * 1000; // 30 minutos
 
         if (tempoProcessamento > tempoLimite) {
-          this.logger.warn(`NFe ${nfe.id} em processamento há mais de 30 minutos, marcando como erro`);
-          
+          this.logger.warn(
+            `NFe ${nfe.id} em processamento há mais de 30 minutos, marcando como erro`,
+          );
+
           if (nfe.id) {
             await this.nfeRepository.update(nfe.id, {
-              status: NfeStatus.REJEITADA
+              status: NfeStatus.REJEITADA,
             });
           }
         }
@@ -107,19 +113,22 @@ export class NFeSyncJob {
       const nfesAntigas = await this.nfeRepository.find({
         where: {
           status: NfeStatus.REJEITADA,
-          updatedAt: LessThan(dataLimite)
+          updatedAt: LessThan(dataLimite),
         },
-        select: ['id', 'numeroNfe', 'updatedAt']
+        select: ['id', 'numeroNfe', 'updatedAt'],
       });
 
-      this.logger.log(`Encontradas ${nfesAntigas.length} NFe antigas para limpeza`);
+      this.logger.log(
+        `Encontradas ${nfesAntigas.length} NFe antigas para limpeza`,
+      );
 
       if (nfesAntigas.length > 0) {
         // Aqui você pode implementar a lógica de limpeza
         // Por exemplo, mover para uma tabela de arquivo ou deletar
-        this.logger.log(`Limpeza de ${nfesAntigas.length} NFe antigas concluída`);
+        this.logger.log(
+          `Limpeza de ${nfesAntigas.length} NFe antigas concluída`,
+        );
       }
-
     } catch (error) {
       this.logger.error('Erro na limpeza de NFe antigas:', error);
     }
@@ -134,7 +143,11 @@ export class NFeSyncJob {
 
     try {
       const hoje = new Date();
-      const inicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+      const inicioDia = new Date(
+        hoje.getFullYear(),
+        hoje.getMonth(),
+        hoje.getDate(),
+      );
       const fimDia = new Date(inicioDia.getTime() + 24 * 60 * 60 * 1000);
 
       // Contar NFe por status do dia
@@ -148,7 +161,6 @@ export class NFeSyncJob {
         .getRawMany();
 
       this.logger.log('Estatísticas do dia:', estatisticas);
-
     } catch (error) {
       this.logger.error('Erro ao gerar estatísticas:', error);
     }
