@@ -1,4 +1,15 @@
-import { IsString, IsUUID, IsDate, IsEnum, IsBoolean, IsOptional, IsArray, ValidateNested, IsNumber, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsDate,
+  IsEnum,
+  IsBoolean,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+  IsObject,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { TipoOperacao } from '../enums/tipo-operacao.enum';
 import { Finalidade } from '../enums/finalidade.enum';
@@ -346,7 +357,10 @@ export class CreateNfeDto {
   destinatarioIM?: string;
 
   @IsOptional()
-  @IsEnum(IndicadorIE, { message: 'destinatarioIndicadorIE must be one of the following values: CONTRIBUINTE_ICMS, CONTRIBUINTE_ISENTO, NAO_CONTRIBUINTE' })
+  @IsEnum(IndicadorIE, {
+    message:
+      'destinatarioIndicadorIE must be one of the following values: CONTRIBUINTE_ICMS, CONTRIBUINTE_ISENTO, NAO_CONTRIBUINTE',
+  })
   destinatarioIndicadorIE?: IndicadorIE;
 
   @IsString()
