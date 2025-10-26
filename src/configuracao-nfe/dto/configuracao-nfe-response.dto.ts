@@ -1,5 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
-import { TipoModeloNfe, AmbienteNfe } from '../../shared/enums/configuracao-nfe.enums';
+import {
+  TipoModeloNfe,
+  AmbienteNfe,
+} from '../../shared/enums/configuracao-nfe.enums';
 
 export class ConfiguracaoNfeResponseDto {
   @Expose()
@@ -78,22 +81,3 @@ export class ConfiguracaoNfeResponseDto {
   @Expose()
   updatedAt: Date;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
