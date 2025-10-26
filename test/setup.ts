@@ -1,11 +1,14 @@
 import 'reflect-metadata';
 
 // Mock do TypeORM para testes
-jest.mock('typeorm', () => ({
-  ...jest.requireActual('typeorm'),
-  getRepository: jest.fn(),
-  getConnection: jest.fn(),
-}));
+jest.mock(
+  'typeorm',
+  (): jest.Mocked<typeof import('typeorm')> => ({
+    ...jest.requireActual('typeorm'),
+    getRepository: jest.fn(),
+    getConnection: jest.fn(),
+  }),
+);
 
 // Mock do bcryptjs
 jest.mock('bcryptjs', () => ({
