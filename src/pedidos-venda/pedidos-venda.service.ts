@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PedidoVenda } from './entities/pedido-venda.entity';
@@ -17,12 +21,15 @@ export class PedidosVendaService {
     private pedidoVendaItemRepository: Repository<PedidoVendaItem>,
   ) {}
 
-  async create(createPedidoDto: CreatePedidoVendaDto, companyId: string): Promise<PedidoVenda> {
+  async create(
+    createPedidoDto: CreatePedidoVendaDto,
+    companyId: string,
+  ): Promise<PedidoVenda> {
     // Calcular totais automaticamente
     const totais = this.calcularTotais(createPedidoDto.itens);
-    
+
     const { itens: itensDto, ...pedidoData } = createPedidoDto;
-    
+
     const pedido = this.pedidoVendaRepository.create({
       ...pedidoData,
       companyId,
@@ -31,20 +38,26 @@ export class PedidosVendaService {
       totalProdutos: totais.totalProdutos,
       totalPedido: totais.totalPedido,
       dataEmissao: new Date(createPedidoDto.dataEmissao),
-      dataPrevisao: createPedidoDto.dataPrevisao ? new Date(createPedidoDto.dataPrevisao) : null,
-      dataEntrega: createPedidoDto.dataEntrega ? new Date(createPedidoDto.dataEntrega) : null,
+      dataPrevisao: createPedidoDto.dataPrevisao
+        ? new Date(createPedidoDto.dataPrevisao)
+        : null,
+      dataEntrega: createPedidoDto.dataEntrega
+        ? new Date(createPedidoDto.dataEntrega)
+        : null,
     } as any);
 
     // Forçar a assinatura correta do overload de save para evitar inferência como array
-    const pedidoSalvo = await this.pedidoVendaRepository.save(pedido as any) as PedidoVenda;
+    const pedidoSalvo = (await this.pedidoVendaRepository.save(
+      pedido as any,
+    )) as PedidoVenda;
 
     // Criar itens do pedido
-    const itens = itensDto.map(itemDto => 
+    const itens = itensDto.map((itemDto) =>
       this.pedidoVendaItemRepository.create({
         ...itemDto,
         pedidoVendaId: pedidoSalvo.id,
         companyId,
-      })
+      }),
     );
 
     await this.pedidoVendaItemRepository.save(itens);
@@ -53,10 +66,22 @@ export class PedidosVendaService {
     return this.findOne(pedidoSalvo.id);
   }
 
-  async findAll(companyId: string, page: number = 1, limit: number = 10): Promise<{ data: PedidoVenda[], total: number }> {
+  async findAll(
+    companyId: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ data: PedidoVenda[]; total: number }> {
     const [pedidos, total] = await this.pedidoVendaRepository.findAndCount({
       where: { companyId },
-      relations: ['cliente', 'vendedor', 'naturezaOperacao', 'prazoPagamento', 'itens', 'itens.produto', 'itens.naturezaOperacao'],
+      relations: [
+        'cliente',
+        'vendedor',
+        'naturezaOperacao',
+        'prazoPagamento',
+        'itens',
+        'itens.produto',
+        'itens.naturezaOperacao',
+      ],
       order: { createdAt: 'DESC' },
       skip: (page - 1) * limit,
       take: limit,
@@ -65,15 +90,18 @@ export class PedidosVendaService {
     return { data: pedidos, total };
   }
 
-  async findOne(id: string, companyId?: string): Promise<PedidoVenda> {
-    const whereCondition: any = { id };
-    if (companyId) {
-      whereCondition.companyId = companyId;
-    }
-
+  async findOne(id: string): Promise<PedidoVenda> {
     const pedido = await this.pedidoVendaRepository.findOne({
-      where: whereCondition,
-      relations: ['cliente', 'vendedor', 'naturezaOperacao', 'prazoPagamento', 'itens', 'itens.produto', 'itens.naturezaOperacao'],
+      where: { id },
+      relations: [
+        'cliente',
+        'vendedor',
+        'naturezaOperacao',
+        'prazoPagamento',
+        'itens',
+        'itens.produto',
+        'itens.naturezaOperacao',
+      ],
     });
 
     if (!pedido) {
@@ -83,7 +111,11 @@ export class PedidosVendaService {
     return pedido;
   }
 
-  async update(id: string, updatePedidoDto: UpdatePedidoVendaDto, companyId: string): Promise<PedidoVenda> {
+  async update(
+    id: string,
+    updatePedidoDto: UpdatePedidoVendaDto,
+    companyId: string,
+  ): Promise<PedidoVenda> {
     const pedido = await this.findOne(id);
 
     if (pedido.companyId !== companyId) {
@@ -100,13 +132,13 @@ export class PedidosVendaService {
 
       // Atualizar itens
       await this.pedidoVendaItemRepository.delete({ pedidoVendaId: id });
-      
-      const itens = updatePedidoDto.itens.map(itemDto => 
+
+      const itens = updatePedidoDto.itens.map((itemDto) =>
         this.pedidoVendaItemRepository.create({
           ...itemDto,
           pedidoVendaId: id,
           companyId,
-        })
+        }),
       );
 
       await this.pedidoVendaItemRepository.save(itens);
@@ -114,20 +146,30 @@ export class PedidosVendaService {
 
     // Converter datas se fornecidas
     if (updatePedidoDto.dataEmissao) {
-      updatePedidoDto.dataEmissao = new Date(updatePedidoDto.dataEmissao).toISOString();
+      updatePedidoDto.dataEmissao = new Date(
+        updatePedidoDto.dataEmissao,
+      ).toISOString();
     }
     if (updatePedidoDto.dataPrevisao) {
-      updatePedidoDto.dataPrevisao = new Date(updatePedidoDto.dataPrevisao).toISOString();
+      updatePedidoDto.dataPrevisao = new Date(
+        updatePedidoDto.dataPrevisao,
+      ).toISOString();
     }
     if (updatePedidoDto.dataEntrega) {
-      updatePedidoDto.dataEntrega = new Date(updatePedidoDto.dataEntrega).toISOString();
+      updatePedidoDto.dataEntrega = new Date(
+        updatePedidoDto.dataEntrega,
+      ).toISOString();
     }
 
     await this.pedidoVendaRepository.update(id, updatePedidoDto);
     return this.findOne(id);
   }
 
-  async updateStatus(id: string, updateStatusDto: UpdateStatusPedidoDto, companyId: string): Promise<PedidoVenda> {
+  async updateStatus(
+    id: string,
+    updateStatusDto: UpdateStatusPedidoDto,
+    companyId: string,
+  ): Promise<PedidoVenda> {
     const pedido = await this.findOne(id);
 
     if (pedido.companyId !== companyId) {
@@ -139,9 +181,9 @@ export class PedidosVendaService {
       throw new BadRequestException('Transição de status inválida');
     }
 
-    await this.pedidoVendaRepository.update(id, { 
+    await this.pedidoVendaRepository.update(id, {
       status: updateStatusDto.status,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     return this.findOne(id);
@@ -156,28 +198,35 @@ export class PedidosVendaService {
 
     // Criar novo pedido baseado no original
     // Evitar espalhar propriedades não permitidas (id, datas gerenciadas) para não confundir os overloads
-    const { id: _omitId, createdAt: _omitCreated, updatedAt: _omitUpdated, ...base } = (pedidoOriginal as any);
+    const {
+      id: _omitId,
+      createdAt: _omitCreated,
+      updatedAt: _omitUpdated,
+      ...base
+    } = pedidoOriginal as any;
     const novoPedido = this.pedidoVendaRepository.create({
-      ...(base as any),
+      ...base,
       numeroPedido: `${pedidoOriginal.numeroPedido}-COPIA`,
       status: StatusPedido.PENDENTE,
       dataEmissao: new Date(),
       dataPrevisao: null,
       dataEntrega: null,
       numeroNFe: null,
-    } as any);
+    });
 
-    const pedidoSalvo = await this.pedidoVendaRepository.save(novoPedido as any) as PedidoVenda;
+    const pedidoSalvo = (await this.pedidoVendaRepository.save(
+      novoPedido as any,
+    )) as PedidoVenda;
 
     // Clonar itens
-    const itensClonados = pedidoOriginal.itens.map(item => 
+    const itensClonados = pedidoOriginal.itens.map((item) =>
       this.pedidoVendaItemRepository.create({
         ...item,
         id: undefined,
         pedidoVendaId: pedidoSalvo.id,
         createdAt: undefined,
         updatedAt: undefined,
-      })
+      }),
     );
 
     await this.pedidoVendaItemRepository.save(itensClonados);
@@ -198,38 +247,60 @@ export class PedidosVendaService {
 
     // Verificar se pode ser excluído (apenas pedidos pendentes)
     if (pedido.status !== StatusPedido.PENDENTE) {
-      throw new BadRequestException('Apenas pedidos pendentes podem ser excluídos');
+      throw new BadRequestException(
+        'Apenas pedidos pendentes podem ser excluídos',
+      );
     }
 
     await this.pedidoVendaRepository.delete(id);
   }
 
-  private calcularTotais(itens: any[]): { totalDescontos: number, totalImpostos: number, totalProdutos: number, totalPedido: number } {
-    const totalDescontos = itens.reduce((sum, item) => sum + (item.valorDesconto || 0), 0);
+  private calcularTotais(itens: any[]): {
+    totalDescontos: number;
+    totalImpostos: number;
+    totalProdutos: number;
+    totalPedido: number;
+  } {
+    const totalDescontos = itens.reduce(
+      (sum, item) => sum + (item.valorDesconto || 0),
+      0,
+    );
     const totalImpostos = 0; // TODO: Implementar cálculo de impostos
-    const totalProdutos = itens.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
+    const totalProdutos = itens.reduce(
+      (sum, item) => sum + (item.valorTotal || 0),
+      0,
+    );
     const totalPedido = totalProdutos + totalImpostos;
 
     return {
       totalDescontos,
       totalImpostos,
       totalProdutos,
-      totalPedido
+      totalPedido,
     };
   }
 
-  private isValidTransition(currentStatus: StatusPedido, newStatus: StatusPedido): boolean {
+  private isValidTransition(
+    currentStatus: StatusPedido,
+    newStatus: StatusPedido,
+  ): boolean {
     const validTransitions: Record<StatusPedido, StatusPedido[]> = {
       [StatusPedido.PENDENTE]: [StatusPedido.APROVADO, StatusPedido.CANCELADO],
-      [StatusPedido.APROVADO]: [StatusPedido.EM_PREPARACAO, StatusPedido.CANCELADO],
-      [StatusPedido.EM_PREPARACAO]: [StatusPedido.ENVIADO, StatusPedido.CANCELADO],
+      [StatusPedido.APROVADO]: [
+        StatusPedido.EM_PREPARACAO,
+        StatusPedido.CANCELADO,
+      ],
+      [StatusPedido.EM_PREPARACAO]: [
+        StatusPedido.ENVIADO,
+        StatusPedido.CANCELADO,
+      ],
       [StatusPedido.ENVIADO]: [StatusPedido.ENTREGUE, StatusPedido.DEVOLVIDO],
       [StatusPedido.ENTREGUE]: [StatusPedido.FATURADO, StatusPedido.DEVOLVIDO],
       [StatusPedido.FATURADO]: [StatusPedido.DEVOLVIDO],
       [StatusPedido.CANCELADO]: [], // Status final
-      [StatusPedido.DEVOLVIDO]: [] // Status final
+      [StatusPedido.DEVOLVIDO]: [], // Status final
     };
-    
+
     return validTransitions[currentStatus]?.includes(newStatus) || false;
   }
 }
