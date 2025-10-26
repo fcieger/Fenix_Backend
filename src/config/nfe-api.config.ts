@@ -20,11 +20,3 @@ export const NFE_API_HEADERS = {
   ACCEPT: 'application/json',
   USER_AGENT: 'Fenix-NFe-Integration/1.0',
 };
-
-
-
-
-
-
-
-
