@@ -7,25 +7,3 @@ export class SimpleController {
     return { message: 'Simple prazos working!' };
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
