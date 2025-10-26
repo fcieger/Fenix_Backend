@@ -14,16 +14,16 @@ import { PedidosVendaService } from './pedidos-venda.service';
 import { CreatePedidoVendaDto } from './dto/create-pedido-venda.dto';
 import { UpdatePedidoVendaDto } from './dto/update-pedido-venda.dto';
 import { UpdateStatusPedidoDto } from './dto/update-status-pedido.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+// import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @Controller('pedidos-venda')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class PedidosVendaController {
   constructor(private readonly pedidosVendaService: PedidosVendaService) {}
 
   @Post()
   create(@Body() createPedidoDto: CreatePedidoVendaDto, @Request() req) {
-    return this.pedidosVendaService.create(createPedidoDto, req.user.activeCompanyId);
+    return this.pedidosVendaService.create(createPedidoDto, req.user.companyId);
   }
 
   @Get()
@@ -34,12 +34,16 @@ export class PedidosVendaController {
   ) {
     const pageNumber = page ? parseInt(page, 10) : 1;
     const limitNumber = limit ? parseInt(limit, 10) : 10;
-    return this.pedidosVendaService.findAll(req.user.activeCompanyId, pageNumber, limitNumber);
+    return this.pedidosVendaService.findAll(
+      req.user.companyId,
+      pageNumber,
+      limitNumber,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.findOne(id, req.user.activeCompanyId);
+  findOne(@Param('id') id: string) {
+    return this.pedidosVendaService.findOne(id);
   }
 
   @Patch(':id')
@@ -48,7 +52,11 @@ export class PedidosVendaController {
     @Body() updatePedidoDto: UpdatePedidoVendaDto,
     @Request() req,
   ) {
-    return this.pedidosVendaService.update(id, updatePedidoDto, req.user.activeCompanyId);
+    return this.pedidosVendaService.update(
+      id,
+      updatePedidoDto,
+      req.user.companyId,
+    );
   }
 
   @Patch(':id/status')
@@ -57,21 +65,25 @@ export class PedidosVendaController {
     @Body() updateStatusDto: UpdateStatusPedidoDto,
     @Request() req,
   ) {
-    return this.pedidosVendaService.updateStatus(id, updateStatusDto, req.user.activeCompanyId);
+    return this.pedidosVendaService.updateStatus(
+      id,
+      updateStatusDto,
+      req.user.companyId,
+    );
   }
 
   @Post(':id/clonar')
   clonar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.clonar(id, req.user.activeCompanyId);
+    return this.pedidosVendaService.clonar(id, req.user.companyId);
   }
 
   @Patch(':id/cancelar')
   cancelar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.cancelar(id, req.user.activeCompanyId);
+    return this.pedidosVendaService.cancelar(id, req.user.companyId);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.remove(id, req.user.activeCompanyId);
+    return this.pedidosVendaService.remove(id, req.user.companyId);
   }
 }
