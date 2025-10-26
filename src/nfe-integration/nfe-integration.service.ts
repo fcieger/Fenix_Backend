@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,9 +12,9 @@ import { Nfe } from '../nfe/entities/nfe.entity';
 import { NfeService } from '../nfe/nfe.service';
 import { ConfiguracaoNfeService } from '../configuracao-nfe/configuracao-nfe.service';
 import { NFE_API_CONFIG, NFE_API_ENDPOINTS } from '../config/nfe-api.config';
-import { 
-  NFeApiRequest, 
-  NFeApiResponse, 
+import {
+  NFeApiRequest,
+  NFeApiResponse,
   WebhookNFeData,
   EmitenteRequest,
   DestinatarioRequest,
@@ -18,7 +23,7 @@ import {
   CobrancaRequest,
   InformacoesAdicionaisRequest,
   EnderecoRequest,
-  ContatoRequest
+  ContatoRequest,
 } from './interfaces/nfe-api.interface';
 import { NfeStatus } from '../nfe/enums/nfe-status.enum';
 import { Ambiente } from '../nfe/enums/ambiente.enum';
@@ -44,13 +49,15 @@ export class NFeIntegrationService {
    * Emitir NFe via API externa
    */
   async emitirNFe(nfeId: string, companyId: string): Promise<NFeApiResponse> {
-    this.logger.log(`Iniciando emissão da NFe ${nfeId} para empresa ${companyId}`);
+    this.logger.log(
+      `Iniciando emissão da NFe ${nfeId} para empresa ${companyId}`,
+    );
 
     try {
       // 1. Buscar NFe no FENIX
       const nfe = await this.nfeRepository.findOne({
         where: { id: nfeId, companyId },
-        relations: ['itens', 'duplicatas']
+        relations: ['itens', 'duplicatas'],
       });
       if (!nfe) {
         throw new NotFoundException('NFe não encontrada');
@@ -58,7 +65,9 @@ export class NFeIntegrationService {
 
       // 2. Verificar se NFe pode ser emitida
       if (nfe.status !== NfeStatus.RASCUNHO) {
-        throw new BadRequestException('NFe deve estar em rascunho para ser emitida');
+        throw new BadRequestException(
+          'NFe deve estar em rascunho para ser emitida',
+        );
       }
 
       // 3. Validar dados antes do envio
@@ -68,14 +77,17 @@ export class NFeIntegrationService {
       const nfeRequest = await this.mapearNFeParaApiExterna(nfe);
 
       // 5. Chamar API NFe externa com retry
-      const response = await this.chamarApiNFeComRetry(NFE_API_ENDPOINTS.EMITIR, nfeRequest, companyId);
+      const response = await this.chamarApiNFeComRetry(
+        NFE_API_ENDPOINTS.EMITIR,
+        nfeRequest,
+        companyId,
+      );
 
       // 6. Atualizar NFe no FENIX com dados da API
       await this.atualizarNFeComRespostaApi(nfeId, response);
 
       this.logger.log(`NFe ${nfeId} enviada com sucesso para API externa`);
       return response;
-
     } catch (error) {
       this.logger.error(`Erro ao emitir NFe ${nfeId}:`, error);
       throw error;
@@ -94,7 +106,9 @@ export class NFeIntegrationService {
     }
 
     if (!nfe.destinatarioRazaoSocial) {
-      throw new BadRequestException('Razão social do destinatário é obrigatória');
+      throw new BadRequestException(
+        'Razão social do destinatário é obrigatória',
+      );
     }
 
     if (!nfe.destinatarioUF) {
@@ -108,13 +122,19 @@ export class NFeIntegrationService {
     // Validar itens
     for (const [index, item] of nfe.itens.entries()) {
       if (!item.descricao) {
-        throw new BadRequestException(`Item ${index + 1}: Descrição é obrigatória`);
+        throw new BadRequestException(
+          `Item ${index + 1}: Descrição é obrigatória`,
+        );
       }
       if (!item.quantidade || item.quantidade <= 0) {
-        throw new BadRequestException(`Item ${index + 1}: Quantidade deve ser maior que zero`);
+        throw new BadRequestException(
+          `Item ${index + 1}: Quantidade deve ser maior que zero`,
+        );
       }
       if (!item.valorUnitario || item.valorUnitario <= 0) {
-        throw new BadRequestException(`Item ${index + 1}: Valor unitário deve ser maior que zero`);
+        throw new BadRequestException(
+          `Item ${index + 1}: Valor unitário deve ser maior que zero`,
+        );
       }
     }
 
@@ -130,30 +150,32 @@ export class NFeIntegrationService {
    * Chamar API NFe com retry automático
    */
   private async chamarApiNFeComRetry(
-    endpoint: string, 
-    data: any, 
-    companyId: string, 
-    maxRetries: number = 3
+    endpoint: string,
+    data: any,
+    companyId: string,
+    maxRetries: number = 3,
   ): Promise<NFeApiResponse> {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        this.logger.log(`Tentativa ${attempt}/${maxRetries} para endpoint ${endpoint}`);
+        this.logger.log(
+          `Tentativa ${attempt}/${maxRetries} para endpoint ${endpoint}`,
+        );
         return await this.chamarApiNFe(endpoint, data, companyId);
       } catch (error) {
         this.logger.warn(`Tentativa ${attempt} falhou:`, error.message);
-        
+
         if (attempt === maxRetries) {
           this.logger.error(`Todas as ${maxRetries} tentativas falharam`);
           throw error;
         }
-        
+
         // Backoff exponencial: 1s, 2s, 4s
         const delay = 1000 * Math.pow(2, attempt - 1);
         this.logger.log(`Aguardando ${delay}ms antes da próxima tentativa...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
-    
+
     // Se chegou aqui, todas as tentativas falharam
     throw new Error('Todas as tentativas de chamada à API NFe falharam');
   }
@@ -163,10 +185,11 @@ export class NFeIntegrationService {
    */
   private async mapearNFeParaApiExterna(nfe: Nfe): Promise<NFeApiRequest> {
     // Buscar configuração NFe para dados do emitente
-    const configuracao = await this.configuracaoNfeService.findOneWithCredentials(
-      nfe.configuracaoNfeId,
-      nfe.companyId
-    );
+    const configuracao =
+      await this.configuracaoNfeService.findOneWithCredentials(
+        nfe.configuracaoNfeId,
+        nfe.companyId,
+      );
 
     return {
       empresaId: nfe.companyId,
@@ -184,36 +207,44 @@ export class NFeIntegrationService {
       finalidade: this.mapearFinalidade(nfe.finalidade),
       consumidorFinal: nfe.consumidorFinal,
       presenca: this.mapearPresenca(nfe.indicadorPresenca),
-      
+
       // Emitente (dados da empresa)
       emitente: await this.obterDadosEmitente(configuracao),
-      
+
       // Destinatário
       destinatario: this.mapearDestinatario(nfe),
-      
+
       // Itens
       itens: this.mapearItens(nfe.itens || []),
-      
+
       // Transporte
       transporte: nfe.modalidadeFrete ? this.mapearTransporte(nfe) : undefined,
-      
+
       // Cobrança
-      cobranca: nfe.duplicatas && nfe.duplicatas.length > 0 ? this.mapearCobranca(nfe) : undefined,
-      
+      cobranca:
+        nfe.duplicatas && nfe.duplicatas.length > 0
+          ? this.mapearCobranca(nfe)
+          : undefined,
+
       // Informações adicionais
-      informacoesAdicionais: nfe.informacoesComplementares || nfe.informacoesFisco ? {
-        informacoesAdicionais: nfe.informacoesComplementares,
-        informacoesComplementares: nfe.informacoesFisco
-      } : undefined,
-      
-      observacoes: nfe.numeroPedido
+      informacoesAdicionais:
+        nfe.informacoesComplementares || nfe.informacoesFisco
+          ? {
+              informacoesAdicionais: nfe.informacoesComplementares,
+              informacoesComplementares: nfe.informacoesFisco,
+            }
+          : undefined,
+
+      observacoes: nfe.numeroPedido,
     };
   }
 
   /**
    * Obter dados do emitente da configuração NFe
    */
-  private async obterDadosEmitente(configuracao: any): Promise<EmitenteRequest> {
+  private async obterDadosEmitente(
+    configuracao: any,
+  ): Promise<EmitenteRequest> {
     return {
       cnpj: configuracao.cnpj,
       nome: configuracao.razaoSocial,
@@ -231,12 +262,12 @@ export class NFeIntegrationService {
         cep: configuracao.endereco?.cep || '',
         codigoPais: configuracao.endereco?.codigoPais || '1058',
         nomePais: configuracao.endereco?.pais || 'Brasil',
-        telefone: configuracao.telefone
+        telefone: configuracao.telefone,
       },
       contato: {
         telefone: configuracao.telefone,
-        email: configuracao.email
-      }
+        email: configuracao.email,
+      },
     };
   }
 
@@ -258,10 +289,10 @@ export class NFeIntegrationService {
         cep: nfe.destinatarioCEP,
         codigoPais: nfe.destinatarioCodigoPais,
         nomePais: nfe.destinatarioPais,
-        telefone: nfe.destinatarioTelefone
+        telefone: nfe.destinatarioTelefone,
       },
       ie: nfe.destinatarioIE,
-      email: nfe.destinatarioEmail
+      email: nfe.destinatarioEmail,
     };
   }
 
@@ -279,10 +310,12 @@ export class NFeIntegrationService {
       quantidadeComercial: item.quantidade,
       valorUnitarioComercial: item.valorUnitario,
       valorTotalProduto: item.valorTotal,
-      unidadeTributavel: item.unidadeTributavel || item.unidadeComercial || 'UN',
+      unidadeTributavel:
+        item.unidadeTributavel || item.unidadeComercial || 'UN',
       quantidadeTributavel: item.quantidadeTributavel || item.quantidade,
-      valorUnitarioTributavel: item.valorUnitarioTributavel || item.valorUnitario,
-      indicadorTotal: 1
+      valorUnitarioTributavel:
+        item.valorUnitarioTributavel || item.valorUnitario,
+      indicadorTotal: 1,
     }));
   }
 
@@ -291,7 +324,7 @@ export class NFeIntegrationService {
    */
   private mapearTransporte(nfe: Nfe): TransporteRequest {
     const transporte: TransporteRequest = {
-      modalidadeFrete: this.mapearModalidadeFrete(nfe.modalidadeFrete)
+      modalidadeFrete: this.mapearModalidadeFrete(nfe.modalidadeFrete),
     };
 
     if (nfe.transportadoraNome) {
@@ -308,8 +341,8 @@ export class NFeIntegrationService {
           uf: '',
           cep: '',
           codigoPais: '1058',
-          nomePais: 'Brasil'
-        }
+          nomePais: 'Brasil',
+        },
       };
     }
 
@@ -317,7 +350,7 @@ export class NFeIntegrationService {
       transporte.veiculo = {
         placa: nfe.veiculoPlaca,
         uf: nfe.veiculoUF || '',
-        rntc: undefined // Campo não existe na entidade Nfe
+        rntc: undefined, // Campo não existe na entidade Nfe
       };
     }
 
@@ -333,8 +366,8 @@ export class NFeIntegrationService {
       duplicata: {
         numero: duplicata.numero,
         dataVencimento: duplicata.dataVencimento.toISOString().split('T')[0],
-        valor: duplicata.valor
-      }
+        valor: duplicata.valor,
+      },
     };
   }
 
@@ -347,11 +380,13 @@ export class NFeIntegrationService {
     try {
       const nfe = await this.nfeRepository.findOne({
         where: { id: nfeId },
-        relations: ['itens', 'duplicatas']
+        relations: ['itens', 'duplicatas'],
       });
-      
+
       if (!nfe || !nfe.chaveAcesso) {
-        this.logger.warn(`NFe ${nfeId} não encontrada ou não possui chave de acesso`);
+        this.logger.warn(
+          `NFe ${nfeId} não encontrada ou não possui chave de acesso`,
+        );
         return;
       }
 
@@ -359,12 +394,11 @@ export class NFeIntegrationService {
         `${NFE_API_ENDPOINTS.STATUS}/${nfe.chaveAcesso}`,
         null,
         nfe.companyId,
-        'GET'
+        'GET',
       );
 
       await this.atualizarStatusNFe(nfeId, response);
       this.logger.log(`Status da NFe ${nfeId} sincronizado com sucesso`);
-
     } catch (error) {
       this.logger.error(`Erro ao sincronizar NFe ${nfeId}:`, error);
       throw error;
@@ -374,13 +408,17 @@ export class NFeIntegrationService {
   /**
    * Cancelar NFe via API externa
    */
-  async cancelarNFe(nfeId: string, justificativa: string, companyId: string): Promise<{ message: string; status: string }> {
+  async cancelarNFe(
+    nfeId: string,
+    justificativa: string,
+    companyId: string,
+  ): Promise<{ message: string; status: string }> {
     this.logger.log(`Cancelando NFe ${nfeId} para empresa ${companyId}`);
 
     try {
       // Buscar NFe no FENIX
       const nfe = await this.nfeRepository.findOne({
-        where: { id: nfeId, companyId }
+        where: { id: nfeId, companyId },
       });
 
       if (!nfe) {
@@ -388,38 +426,41 @@ export class NFeIntegrationService {
       }
 
       if (!nfe.chaveAcesso) {
-        throw new BadRequestException('NFe não possui chave de acesso para cancelamento');
+        throw new BadRequestException(
+          'NFe não possui chave de acesso para cancelamento',
+        );
       }
 
       if (nfe.status !== NfeStatus.AUTORIZADA) {
-        throw new BadRequestException('Apenas NFes autorizadas podem ser canceladas');
+        throw new BadRequestException(
+          'Apenas NFes autorizadas podem ser canceladas',
+        );
       }
 
       // Validar justificativa
       if (!justificativa || justificativa.trim().length < 15) {
-        throw new BadRequestException('Justificativa deve ter pelo menos 15 caracteres');
+        throw new BadRequestException(
+          'Justificativa deve ter pelo menos 15 caracteres',
+        );
       }
 
       // Chamar API NFe para cancelamento
       const response = await this.chamarApiNFeComRetry(
         `${NFE_API_ENDPOINTS.CANCELAR}/${nfe.chaveAcesso}`,
         { justificativa },
-        companyId
+        companyId,
       );
 
       // Atualizar status da NFe
       await this.nfeRepository.update(nfeId, {
         status: NfeStatus.CANCELADA,
-        dataCancelamento: new Date(),
-        justificativaCancelamento: justificativa
       });
 
       this.logger.log(`NFe ${nfeId} cancelada com sucesso`);
       return {
         message: 'NFe cancelada com sucesso',
-        status: 'CANCELADA'
+        status: 'CANCELADA',
       };
-
     } catch (error) {
       this.logger.error(`Erro ao cancelar NFe ${nfeId}:`, error);
       throw error;
@@ -429,12 +470,15 @@ export class NFeIntegrationService {
   /**
    * Download XML da NFe
    */
-  async downloadXML(nfeId: string, companyId: string): Promise<{ xml: string; filename: string }> {
+  async downloadXML(
+    nfeId: string,
+    companyId: string,
+  ): Promise<{ xml: string; filename: string }> {
     this.logger.log(`Download XML da NFe ${nfeId}`);
 
     try {
       const nfe = await this.nfeRepository.findOne({
-        where: { id: nfeId, companyId }
+        where: { id: nfeId, companyId },
       });
 
       if (!nfe) {
@@ -449,17 +493,16 @@ export class NFeIntegrationService {
       const response = await this.chamarApiNFeComRetry(
         `${NFE_API_ENDPOINTS.CONSULTAR}/xml/${nfe.chaveAcesso}`,
         null,
-        companyId
+        companyId,
       );
 
       const filename = `NFe_${nfe.chaveAcesso}.xml`;
-      
+
       this.logger.log(`XML da NFe ${nfeId} baixado com sucesso`);
       return {
         xml: response.xml || response.data,
-        filename
+        filename,
       };
-
     } catch (error) {
       this.logger.error(`Erro ao baixar XML da NFe ${nfeId}:`, error);
       throw error;
@@ -469,12 +512,15 @@ export class NFeIntegrationService {
   /**
    * Download PDF da NFe
    */
-  async downloadPDF(nfeId: string, companyId: string): Promise<{ pdf: string; filename: string }> {
+  async downloadPDF(
+    nfeId: string,
+    companyId: string,
+  ): Promise<{ pdf: string; filename: string }> {
     this.logger.log(`Download PDF da NFe ${nfeId}`);
 
     try {
       const nfe = await this.nfeRepository.findOne({
-        where: { id: nfeId, companyId }
+        where: { id: nfeId, companyId },
       });
 
       if (!nfe) {
@@ -489,17 +535,16 @@ export class NFeIntegrationService {
       const response = await this.chamarApiNFeComRetry(
         `${NFE_API_ENDPOINTS.CONSULTAR}/pdf/${nfe.chaveAcesso}`,
         null,
-        companyId
+        companyId,
       );
 
       const filename = `NFe_${nfe.chaveAcesso}.pdf`;
-      
+
       this.logger.log(`PDF da NFe ${nfeId} baixado com sucesso`);
       return {
         pdf: response.pdf || response.data,
-        filename
+        filename,
       };
-
     } catch (error) {
       this.logger.error(`Erro ao baixar PDF da NFe ${nfeId}:`, error);
       throw error;
@@ -509,12 +554,15 @@ export class NFeIntegrationService {
   /**
    * Download DANFE da NFe
    */
-  async downloadDANFE(nfeId: string, companyId: string): Promise<{ danfe: string; filename: string }> {
+  async downloadDANFE(
+    nfeId: string,
+    companyId: string,
+  ): Promise<{ danfe: string; filename: string }> {
     this.logger.log(`Download DANFE da NFe ${nfeId}`);
 
     try {
       const nfe = await this.nfeRepository.findOne({
-        where: { id: nfeId, companyId }
+        where: { id: nfeId, companyId },
       });
 
       if (!nfe) {
@@ -529,17 +577,16 @@ export class NFeIntegrationService {
       const response = await this.chamarApiNFeComRetry(
         `${NFE_API_ENDPOINTS.CONSULTAR}/danfe/${nfe.chaveAcesso}`,
         null,
-        companyId
+        companyId,
       );
 
       const filename = `DANFE_${nfe.chaveAcesso}.pdf`;
-      
+
       this.logger.log(`DANFE da NFe ${nfeId} baixado com sucesso`);
       return {
         danfe: response.danfe || response.data,
-        filename
+        filename,
       };
-
     } catch (error) {
       this.logger.error(`Erro ao baixar DANFE da NFe ${nfeId}:`, error);
       throw error;
@@ -556,12 +603,11 @@ export class NFeIntegrationService {
       const response = await this.chamarApiNFeComRetry(
         `${NFE_API_ENDPOINTS.CONSULTAR}/${chaveAcesso}`,
         null,
-        companyId
+        companyId,
       );
 
       this.logger.log(`NFe ${chaveAcesso} consultada com sucesso`);
       return response;
-
     } catch (error) {
       this.logger.error(`Erro ao consultar NFe ${chaveAcesso}:`, error);
       throw error;
@@ -577,11 +623,13 @@ export class NFeIntegrationService {
     try {
       // Buscar NFe no FENIX
       const nfe = await this.nfeRepository.findOne({
-        where: { id: webhookData.nfeId }
+        where: { id: webhookData.nfeId },
       });
 
       if (!nfe) {
-        this.logger.warn(`NFe ${webhookData.nfeId} não encontrada para webhook`);
+        this.logger.warn(
+          `NFe ${webhookData.nfeId} não encontrada para webhook`,
+        );
         return;
       }
 
@@ -591,13 +639,15 @@ export class NFeIntegrationService {
         chaveAcesso: webhookData.chaveAcesso,
         xmlNfe: webhookData.xmlNfe,
         protocoloAutorizacao: webhookData.protocoloAutorizacao,
-        dataAutorizacao: new Date(webhookData.dataAtualizacao)
+        dataAutorizacao: new Date(webhookData.dataAtualizacao),
       });
 
       this.logger.log(`NFe ${webhookData.nfeId} atualizada via webhook`);
-
     } catch (error) {
-      this.logger.error(`Erro ao processar webhook da NFe ${webhookData.nfeId}:`, error);
+      this.logger.error(
+        `Erro ao processar webhook da NFe ${webhookData.nfeId}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -606,35 +656,44 @@ export class NFeIntegrationService {
    * Chamar API NFe externa
    */
   private async chamarApiNFe(
-    endpoint: string, 
-    data: any, 
-    companyId: string, 
-    method: 'GET' | 'POST' = 'POST'
+    endpoint: string,
+    data: any,
+    companyId: string,
+    method: 'GET' | 'POST' = 'POST',
   ): Promise<NFeApiResponse> {
     const url = `${NFE_API_CONFIG.BASE_URL}${endpoint}`;
-    
+
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       'X-Empresa-Id': companyId,
-      'Authorization': `Bearer ${await this.obterTokenApiNfe()}`
+      Authorization: `Bearer ${await this.obterTokenApiNfe()}`,
     };
 
     try {
       let response;
       if (method === 'GET') {
         response = await firstValueFrom(
-          this.httpService.get(url, { headers, timeout: NFE_API_CONFIG.TIMEOUT })
+          this.httpService.get(url, {
+            headers,
+            timeout: NFE_API_CONFIG.TIMEOUT,
+          }),
         );
       } else {
         response = await firstValueFrom(
-          this.httpService.post(url, data, { headers, timeout: NFE_API_CONFIG.TIMEOUT })
+          this.httpService.post(url, data, {
+            headers,
+            timeout: NFE_API_CONFIG.TIMEOUT,
+          }),
         );
       }
 
       return response.data;
     } catch (error) {
-      this.logger.error(`Erro na chamada para API NFe:`, error.response?.data || error.message);
+      this.logger.error(
+        `Erro na chamada para API NFe:`,
+        error.response?.data || error.message,
+      );
       throw new BadRequestException('Erro na comunicação com API NFe');
     }
   }
@@ -645,63 +704,91 @@ export class NFeIntegrationService {
   private async obterTokenApiNfe(): Promise<string> {
     try {
       this.logger.log('Iniciando autenticação com API NFe');
-      
+
       const authData = {
         username: process.env.NFE_API_USERNAME || 'admin',
-        password: process.env.NFE_API_PASSWORD || 'admin123'
+        password: process.env.NFE_API_PASSWORD || 'admin123',
       };
 
       const response = await firstValueFrom(
-        this.httpService.post(`${NFE_API_CONFIG.BASE_URL}/api/auth/login`, authData, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+        this.httpService.post(
+          `${NFE_API_CONFIG.BASE_URL}/api/auth/login`,
+          authData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+            },
+            timeout: NFE_API_CONFIG.TIMEOUT,
           },
-          timeout: NFE_API_CONFIG.TIMEOUT
-        })
+        ),
       );
 
-      if (response.data && response.data.data && response.data.data.accessToken) {
+      if (
+        response.data &&
+        response.data.data &&
+        response.data.data.accessToken
+      ) {
         this.logger.log('Token obtido com sucesso da API NFe');
         return response.data.data.accessToken;
       } else {
         throw new Error('Resposta de autenticação inválida');
       }
-
     } catch (error) {
-      this.logger.error('Erro ao obter token da API NFe:', error.response?.data || error.message);
-      
+      this.logger.error(
+        'Erro ao obter token da API NFe:',
+        error.response?.data || error.message,
+      );
+
       // Verificar se é erro de conexão (API não disponível)
-      if (error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED')) {
-        throw new BadRequestException('API NFe não está disponível. Verifique se o serviço está rodando na porta 8080.');
+      if (
+        error.code === 'ECONNREFUSED' ||
+        error.message?.includes('ECONNREFUSED')
+      ) {
+        throw new BadRequestException(
+          'API NFe não está disponível. Verifique se o serviço está rodando na porta 8080.',
+        );
       }
-      
-      throw new BadRequestException('Falha na autenticação com API NFe: ' + (error.response?.data?.message || error.message));
+
+      throw new BadRequestException(
+        'Falha na autenticação com API NFe: ' +
+          (error.response?.data?.message || error.message),
+      );
     }
   }
 
   /**
    * Atualizar NFe com resposta da API
    */
-  private async atualizarNFeComRespostaApi(nfeId: string, response: NFeApiResponse): Promise<void> {
+  private async atualizarNFeComRespostaApi(
+    nfeId: string,
+    response: NFeApiResponse,
+  ): Promise<void> {
     await this.nfeRepository.update(nfeId, {
       status: this.mapearStatusApiParaFenix(response.status),
       chaveAcesso: response.chaveAcesso,
       xmlNfe: response.xmlNfe,
       protocoloAutorizacao: response.protocoloAutorizacao,
-      dataAutorizacao: response.dataAutorizacao ? new Date(response.dataAutorizacao) : undefined
+      dataAutorizacao: response.dataAutorizacao
+        ? new Date(response.dataAutorizacao)
+        : undefined,
     });
   }
 
   /**
    * Atualizar status da NFe
    */
-  private async atualizarStatusNFe(nfeId: string, response: any): Promise<void> {
+  private async atualizarStatusNFe(
+    nfeId: string,
+    response: any,
+  ): Promise<void> {
     await this.nfeRepository.update(nfeId, {
       status: this.mapearStatusApiParaFenix(response.status),
       xmlNfe: response.xmlNfe,
       protocoloAutorizacao: response.protocoloAutorizacao,
-      dataAutorizacao: response.dataAutorizacao ? new Date(response.dataAutorizacao) : undefined
+      dataAutorizacao: response.dataAutorizacao
+        ? new Date(response.dataAutorizacao)
+        : undefined,
     });
   }
 
@@ -719,7 +806,7 @@ export class NFeIntegrationService {
       [Finalidade.NORMAL]: 1,
       [Finalidade.COMPLEMENTAR]: 2,
       [Finalidade.AJUSTE]: 3,
-      [Finalidade.DEVOLUCAO]: 4
+      [Finalidade.DEVOLUCAO]: 4,
     };
     return map[finalidade] || 1;
   }
@@ -732,7 +819,7 @@ export class NFeIntegrationService {
       [IndicadorPresenca.TELEATENDIMENTO]: 3,
       [IndicadorPresenca.NFCe_ENTREGA_DOMICILIO]: 4,
       [IndicadorPresenca.NFCe_PRESENCIAL_FORA_ESTABELECIMENTO]: 5,
-      [IndicadorPresenca.OUTROS]: 9
+      [IndicadorPresenca.OUTROS]: 9,
     };
     return map[indicadorPresenca] || 0;
   }
@@ -742,18 +829,18 @@ export class NFeIntegrationService {
       [ModalidadeFrete.SEM_FRETE]: 0,
       [ModalidadeFrete.POR_CONTA_EMITENTE]: 1,
       [ModalidadeFrete.POR_CONTA_DESTINATARIO]: 2,
-      [ModalidadeFrete.POR_CONTA_TERCEIROS]: 3
+      [ModalidadeFrete.POR_CONTA_TERCEIROS]: 3,
     };
     return map[modalidadeFrete] || 0;
   }
 
   private mapearStatusApiParaFenix(status: string): NfeStatus {
     const map = {
-      'RASCUNHO': NfeStatus.RASCUNHO,
-      'PROCESSANDO': NfeStatus.PENDENTE,
-      'AUTORIZADA': NfeStatus.AUTORIZADA,
-      'REJEITADA': NfeStatus.REJEITADA,
-      'CANCELADA': NfeStatus.CANCELADA
+      RASCUNHO: NfeStatus.RASCUNHO,
+      PROCESSANDO: NfeStatus.PENDENTE,
+      AUTORIZADA: NfeStatus.AUTORIZADA,
+      REJEITADA: NfeStatus.REJEITADA,
+      CANCELADA: NfeStatus.CANCELADA,
     };
     return map[status] || NfeStatus.RASCUNHO;
   }
