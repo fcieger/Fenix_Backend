@@ -159,6 +159,3 @@ export interface WebhookNFeData {
   protocoloAutorizacao?: string;
   erros?: ErroNFe[];
 }
-
-
-
