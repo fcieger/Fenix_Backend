@@ -8,16 +8,16 @@ import { Company } from '../companies/entities/company.entity';
 import { Cadastro } from '../cadastros/entities/cadastro.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    NaturezaOperacao, 
-    ConfiguracaoImpostoEstado, 
-    Company, 
-    Cadastro
-  ])],
+  imports: [
+    TypeOrmModule.forFeature([
+      NaturezaOperacao,
+      ConfiguracaoImpostoEstado,
+      Company,
+      Cadastro,
+    ]),
+  ],
   controllers: [ImpostosController],
   providers: [CalculadoraImpostosService],
   exports: [CalculadoraImpostosService],
 })
 export class ImpostosModule {}
-
-
