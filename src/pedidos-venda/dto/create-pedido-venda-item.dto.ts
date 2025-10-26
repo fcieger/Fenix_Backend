@@ -1,4 +1,10 @@
-import { IsUUID, IsString, IsNumber, IsOptional, IsEnum, IsDecimal } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { TipoEstoque } from '../../shared/enums/pedido-venda.enums';
 
