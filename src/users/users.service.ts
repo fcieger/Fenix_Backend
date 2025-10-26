@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
@@ -63,7 +67,9 @@ export class UsersService {
     return lastLog ? lastLog.createdAt : null;
   }
 
-  async getUserWithLastAccess(userId: string): Promise<User & { lastLogin: Date | null }> {
+  async getUserWithLastAccess(
+    userId: string,
+  ): Promise<User & { lastLogin: Date | null }> {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
@@ -71,19 +77,5 @@ export class UsersService {
 
     const lastLogin = await this.getLastAccess(userId);
     return { ...user, lastLogin };
-  }
-
-  async resetPasswordByEmail(email: string, newPassword: string): Promise<User> {
-    const user = await this.findByEmail(email);
-    if (!user) {
-      throw new NotFoundException('Usuário não encontrado');
-    }
-
-    // Hash da nova senha
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Atualizar senha
-    user.password = hashedPassword;
-    return this.usersRepository.save(user);
   }
 }
