@@ -1,10 +1,13 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+// import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CalculadoraImpostosService } from './impostos.service';
-import { CalcularImpostosPedidoDto, CalcularImpostosResponseDto } from './dto/calcular-impostos.dto';
+import {
+  CalcularImpostosPedidoDto,
+  CalcularImpostosResponseDto,
+} from './dto/calcular-impostos.dto';
 
 @Controller('impostos')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class ImpostosController {
   constructor(private readonly service: CalculadoraImpostosService) {}
 
@@ -14,5 +17,3 @@ export class ImpostosController {
     return this.service.calcularPedido(dto);
   }
 }
-
-
