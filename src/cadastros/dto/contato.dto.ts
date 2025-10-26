@@ -29,8 +29,3 @@ export class ContatoDto {
   @IsBoolean()
   principal?: boolean;
 }
-
-
-
-
-
