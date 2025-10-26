@@ -1,16 +1,24 @@
-import { IsString, IsNotEmpty, Matches, IsOptional, IsObject, IsArray, IsBoolean } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  Matches,
+  IsOptional,
+  IsObject,
+  IsArray,
+} from 'class-validator';
 
 export class CreateCompanyDto {
   @IsString()
   @IsNotEmpty()
   @Matches(/^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{3}\.\d{3}\.\d{3}-\d{2})$/, {
-    message: 'CNPJ deve estar no formato 00.000.000/0000-00 ou CPF no formato 000.000.000-00',
+    message:
+      'CNPJ deve estar no formato 00.000.000/0000-00 ou CPF no formato 000.000.000-00',
   })
   cnpj: string;
 
   @IsString()
-  @IsOptional()
-  name?: string;
+  @IsNotEmpty()
+  name: string;
 
   // Dados adicionais da consulta CNPJ
   @IsOptional()
@@ -66,8 +74,4 @@ export class CreateCompanyDto {
     role: string;
     type: string;
   }>;
-
-  @IsOptional()
-  @IsBoolean()
-  simplesNacional?: boolean;
 }
