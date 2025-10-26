@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Company } from '../../companies/entities/company.entity';
 
 @Entity('prazos_pagamento')
@@ -15,7 +23,7 @@ export class PrazoPagamento {
   @Column({
     type: 'enum',
     enum: ['dias', 'parcelas', 'personalizado'],
-    default: 'dias'
+    default: 'dias',
   })
   tipo: 'dias' | 'parcelas' | 'personalizado';
 
@@ -25,12 +33,12 @@ export class PrazoPagamento {
     dias?: number;
     percentualEntrada?: number;
     percentualRestante?: number;
-    
+
     // Para tipo 'parcelas'
     numeroParcelas?: number;
     intervaloDias?: number;
     percentualParcelas?: number;
-    
+
     // Para tipo 'personalizado'
     parcelas?: Array<{
       numero: number;
