@@ -337,4 +337,3 @@ export class NfeResponseDto {
   @Expose()
   updatedAt: Date;
 }
-
