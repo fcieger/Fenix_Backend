@@ -11,10 +11,13 @@ export class CadastrosService {
     private cadastrosRepository: Repository<Cadastro>,
   ) {}
 
-  async create(createCadastroDto: CreateCadastroDto, companyId: string): Promise<Cadastro> {
+  async create(
+    createCadastroDto: CreateCadastroDto,
+    companyId: string,
+  ): Promise<Cadastro> {
     const cadastro = this.cadastrosRepository.create({
       ...createCadastroDto,
-      companyId
+      companyId,
     });
     return await this.cadastrosRepository.save(cadastro);
   }
@@ -38,9 +41,13 @@ export class CadastrosService {
     return cadastro;
   }
 
-  async update(id: string, updateData: Partial<CreateCadastroDto>, companyId: string): Promise<Cadastro> {
+  async update(
+    id: string,
+    updateData: Partial<CreateCadastroDto>,
+    companyId: string,
+  ): Promise<Cadastro> {
     const cadastro = await this.findOne(id, companyId);
-    
+
     Object.assign(cadastro, updateData);
     return await this.cadastrosRepository.save(cadastro);
   }
