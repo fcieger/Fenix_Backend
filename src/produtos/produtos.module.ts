@@ -11,6 +11,3 @@ import { Produto } from './entities/produto.entity';
   exports: [ProdutosService],
 })
 export class ProdutosModule {}
-
-
-
