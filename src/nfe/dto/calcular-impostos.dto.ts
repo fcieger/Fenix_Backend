@@ -21,4 +21,3 @@ export class CalcularImpostosDto {
   @IsString()
   destinatarioTipo?: string; // F=CPF, J=CNPJ
 }
-
