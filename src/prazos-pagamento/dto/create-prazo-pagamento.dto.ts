@@ -1,4 +1,15 @@
-import { IsString, IsEnum, IsObject, IsBoolean, IsOptional, IsNumber, IsArray, ValidateNested, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsObject,
+  IsBoolean,
+  IsOptional,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class ParcelaDto {
@@ -38,7 +49,7 @@ export class ConfiguracoesDto {
   @Min(0)
   @Max(100)
   percentualRestante?: number;
-  
+
   // Para tipo 'parcelas'
   @IsOptional()
   @IsNumber()
@@ -55,7 +66,7 @@ export class ConfiguracoesDto {
   @Min(0)
   @Max(100)
   percentualParcelas?: number;
-  
+
   // Para tipo 'personalizado'
   @IsOptional()
   @IsArray()
