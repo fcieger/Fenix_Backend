@@ -1,178 +1,77 @@
-import { 
-  IsString, 
-  IsUUID, 
-  IsBoolean, 
-  IsEnum, 
-  IsNumber, 
-  IsOptional, 
-  IsDateString, 
-  IsArray, 
-  ValidateNested 
-} from 'class-validator';
+import { IsUUID, IsOptional, IsEnum, IsDateString, IsString, IsArray, ValidateNested, IsNumber, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
-import { 
-  StatusPedido, 
-  TipoFrete, 
-  IndicadorPresenca, 
-  FormaPagamento, 
-  TipoEstoque 
-} from '../../shared/enums/pedido-venda.enums';
-import { CreatePedidoVendaItemDto } from './create-pedido-venda-item.dto';
+import { StatusPedidoVenda } from '../entities/pedido-venda.entity';
+
+class PedidoVendaItemInput {
+  @IsOptional() @IsUUID() produtoId?: string;
+  @IsUUID() naturezaOperacaoId: string;
+  @IsOptional() @IsString() codigo?: string;
+  @IsOptional() @IsString() nome?: string;
+  @IsOptional() @IsString() unidade?: string;
+  @IsOptional() @IsString() ncm?: string;
+  @IsOptional() @IsString() cest?: string;
+  @IsNumber() quantidade: number;
+  @IsNumber() precoUnitario: number;
+  @IsOptional() @IsNumber() descontoValor?: number;
+  @IsOptional() @IsNumber() descontoPercentual?: number;
+  @IsOptional() @IsNumber() freteRateado?: number;
+  @IsOptional() @IsNumber() seguroRateado?: number;
+  @IsOptional() @IsNumber() outrasDespesasRateado?: number;
+  @IsOptional() @IsString() observacoes?: string;
+  @IsOptional() @IsNumber() numeroItem?: number;
+}
 
 export class CreatePedidoVendaDto {
-  @IsString()
-  numeroPedido: string;
+  @IsUUID() companyId: string;
 
-  @IsString()
-  @IsOptional()
-  numeroNFe?: string;
+  @IsUUID() clienteId: string;
+  @IsOptional() @IsUUID() vendedorId?: string;
+  @IsOptional() @IsUUID() transportadoraId?: string;
 
-  @IsDateString()
-  dataEmissao: string;
+  @IsOptional() @IsUUID() prazoPagamentoId?: string;
+  @IsOptional() @IsUUID() naturezaOperacaoPadraoId?: string;
 
-  @IsDateString()
-  @IsOptional()
-  dataPrevisao?: string;
+  @IsOptional() @IsUUID() formaPagamentoId?: string;
+  @IsOptional() @IsString() parcelamento?: string;
+  @IsOptional() @IsBoolean() consumidorFinal?: boolean;
+  @IsOptional() @IsString() indicadorPresenca?: string;
+  @IsOptional() @IsUUID() localEstoqueId?: string;
+  @IsOptional() @IsString() listaPreco?: string;
 
-  @IsDateString()
-  @IsOptional()
-  dataEntrega?: string;
+  @IsDateString() dataEmissao: string;
+  @IsOptional() @IsDateString() dataPrevisaoEntrega?: string;
+  @IsOptional() @IsDateString() dataEntrega?: string;
 
-  @IsString()
-  numeroOrdemCompra: string;
+  @IsOptional() @IsString() numero?: string;
+  @IsOptional() @IsString() serie?: string;
+  @IsOptional() @IsString() numeroOrdemCompra?: string;
 
-  @IsUUID()
-  clienteId: string;
+  @IsOptional() @IsUUID() orcamentoId?: string;
 
-  @IsUUID()
-  @IsOptional()
-  vendedorId?: string;
+  // Frete e despesas
+  @IsOptional() @IsString() frete?: string;
+  @IsOptional() @IsNumber() valorFrete?: number;
+  @IsOptional() @IsNumber() despesas?: number;
+  @IsOptional() @IsBoolean() incluirFreteTotal?: boolean;
 
-  @IsUUID()
-  @IsOptional()
-  transportadoraId?: string;
+  // Dados do veículo
+  @IsOptional() @IsString() placaVeiculo?: string;
+  @IsOptional() @IsString() ufPlaca?: string;
+  @IsOptional() @IsString() rntc?: string;
 
-  @IsUUID()
-  naturezaOperacaoId: string;
+  // Dados de volume e peso
+  @IsOptional() @IsNumber() pesoLiquido?: number;
+  @IsOptional() @IsNumber() pesoBruto?: number;
+  @IsOptional() @IsNumber() volume?: number;
+  @IsOptional() @IsString() especie?: string;
+  @IsOptional() @IsString() marca?: string;
+  @IsOptional() @IsString() numeracao?: string;
+  @IsOptional() @IsNumber() quantidadeVolumes?: number;
 
-  @IsUUID()
-  @IsOptional()
-  prazoPagamentoId?: string;
+  @IsOptional() @IsString() observacoes?: string;
 
-  @IsBoolean()
-  @IsOptional()
-  consumidorFinal?: boolean;
+  @IsOptional() @IsEnum(StatusPedidoVenda) status?: StatusPedidoVenda;
 
-  @IsEnum(IndicadorPresenca)
-  @IsOptional()
-  indicadorPresenca?: IndicadorPresenca;
-
-  @IsEnum(FormaPagamento)
-  @IsOptional()
-  formaPagamento?: FormaPagamento;
-
-  @IsString()
-  @IsOptional()
-  parcelamento?: string;
-
-  @IsEnum(TipoEstoque)
-  @IsOptional()
-  estoque?: TipoEstoque;
-
-  @IsString()
-  @IsOptional()
-  listaPreco?: string;
-
-  @IsEnum(TipoFrete)
-  @IsOptional()
-  frete?: TipoFrete;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  valorFrete?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  despesas?: number;
-
-  @IsBoolean()
-  @IsOptional()
-  incluirFreteTotal?: boolean;
-
-  // Dados do Veículo
-  @IsString()
-  @IsOptional()
-  placaVeiculo?: string;
-
-  @IsString()
-  @IsOptional()
-  ufPlaca?: string;
-
-  @IsString()
-  @IsOptional()
-  rntc?: string;
-
-  // Dados de Volume e Peso
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  pesoLiquido?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  pesoBruto?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  volume?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  quantidadeVolumes?: number;
-
-  @IsString()
-  @IsOptional()
-  especie?: string;
-
-  @IsString()
-  @IsOptional()
-  marca?: string;
-
-  @IsString()
-  @IsOptional()
-  numeracao?: string;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  totalDescontos?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  totalImpostos?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  totalProdutos?: number;
-
-  @IsNumber()
-  @IsOptional()
-  @Type(() => Number)
-  totalPedido?: number;
-
-  @IsEnum(StatusPedido)
-  @IsOptional()
-  status?: StatusPedido;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreatePedidoVendaItemDto)
-  itens: CreatePedidoVendaItemDto[];
+  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => PedidoVendaItemInput)
+  itens?: PedidoVendaItemInput[];
 }
