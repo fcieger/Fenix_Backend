@@ -11,86 +11,20 @@ import { PedidoVenda } from './pedido-venda.entity';
 import { Produto } from '../../produtos/entities/produto.entity';
 import { NaturezaOperacao } from '../../natureza-operacao/entities/natureza-operacao.entity';
 import { Company } from '../../companies/entities/company.entity';
-import { TipoEstoque } from '../../shared/enums/pedido-venda.enums';
 
 @Entity('pedidos_venda_itens')
 export class PedidoVendaItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Relacionamento com Pedido
-  @ManyToOne(() => PedidoVenda, pedido => pedido.itens, { onDelete: 'CASCADE' })
+  @ManyToOne(() => PedidoVenda, (pedido) => pedido.itens, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'pedidoVendaId' })
   pedidoVenda: PedidoVenda;
 
   @Column({ type: 'uuid' })
   pedidoVendaId: string;
 
-  // Relacionamento com Produto (opcional - pode ser null para produtos não cadastrados)
-  @ManyToOne(() => Produto, { eager: true, nullable: true })
-  @JoinColumn({ name: 'produtoId' })
-  produto?: Produto;
-
-  @Column({ type: 'uuid', nullable: true })
-  produtoId?: string;
-
-  // Relacionamento com Natureza de Operação
-  @ManyToOne(() => NaturezaOperacao, { eager: true })
-  @JoinColumn({ name: 'naturezaOperacaoId' })
-  naturezaOperacao: NaturezaOperacao;
-
-  @Column({ type: 'uuid' })
-  naturezaOperacaoId: string;
-
-  // CAMPOS ESPECÍFICOS DO ITEM (podem diferir do produto)
-  @Column()
-  codigo: string; // Pode ser diferente do produto.sku
-
-  @Column()
-  nome: string; // Pode ser diferente do produto.nome
-
-  @Column()
-  unidadeMedida: string; // Pode ser diferente do produto.unidadeMedida
-
-  // Quantidades e Valores
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  quantidade: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 6 })
-  valorUnitario: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  valorDesconto: number;
-
-  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
-  percentualDesconto: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  valorTotal: number;
-
-  // Configurações específicas do item
-  @Column({ type: 'int', default: TipoEstoque.PRINCIPAL })
-  estoque: TipoEstoque;
-
-  @Column({ nullable: true })
-  ncm: string; // Pode ser diferente do produto.ncm
-
-  @Column({ nullable: true })
-  cest: string; // Pode ser diferente do produto.cest
-
-  @Column({ nullable: true })
-  numeroOrdem: string;
-
-  @Column({ nullable: true })
-  numeroItem: string;
-
-  @Column({ nullable: true })
-  codigoBeneficioFiscal: string;
-
-  @Column({ type: 'text', nullable: true })
-  observacoes: string;
-
-  // Campos de controle
+  // Empresa
   @Column({ type: 'uuid' })
   companyId: string;
 
@@ -98,6 +32,112 @@ export class PedidoVendaItem {
   @JoinColumn({ name: 'companyId' })
   company: Company;
 
+  // Produto (opcional - permite item livre)
+  @ManyToOne(() => Produto, { eager: true, nullable: true })
+  @JoinColumn({ name: 'produtoId' })
+  produto?: Produto;
+
+  @Column({ type: 'uuid', nullable: true })
+  produtoId?: string;
+
+  // Natureza de operação por item (obrigatória)
+  @ManyToOne(() => NaturezaOperacao, { eager: true })
+  @JoinColumn({ name: 'naturezaOperacaoId' })
+  naturezaOperacao: NaturezaOperacao;
+
+  @Column({ type: 'uuid' })
+  naturezaOperacaoId: string;
+
+  // Identificação e descrição do item
+  @Column({ nullable: true })
+  codigo?: string;
+
+  @Column({ nullable: true })
+  nome?: string;
+
+  @Column({ nullable: true })
+  unidade?: string;
+
+  // Fiscais do item
+  @Column({ nullable: true })
+  ncm?: string;
+
+  @Column({ nullable: true })
+  cest?: string;
+
+  // Quantidades e valores
+  @Column({ type: 'decimal', precision: 14, scale: 6 })
+  quantidade: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 6 })
+  precoUnitario: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  descontoValor: number;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, default: 0 })
+  descontoPercentual: number;
+
+  // Rateios (frete/seguro/outras)
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  freteRateado: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  seguroRateado: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  outrasDespesasRateado: number;
+
+  // Impostos calculados por item
+  @Column({ type: 'decimal', precision: 14, scale: 4, nullable: true })
+  icmsBase?: number;
+
+  @Column({ type: 'decimal', precision: 7, scale: 4, nullable: true })
+  icmsAliquota?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  icmsValor?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 4, nullable: true })
+  icmsStBase?: number;
+
+  @Column({ type: 'decimal', precision: 7, scale: 4, nullable: true })
+  icmsStAliquota?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  icmsStValor?: number;
+
+  @Column({ type: 'decimal', precision: 7, scale: 4, nullable: true })
+  ipiAliquota?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  ipiValor?: number;
+
+  @Column({ type: 'decimal', precision: 7, scale: 4, nullable: true })
+  pisAliquota?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  pisValor?: number;
+
+  @Column({ type: 'decimal', precision: 7, scale: 4, nullable: true })
+  cofinsAliquota?: number;
+
+  @Column({ type: 'decimal', precision: 14, scale: 2, nullable: true })
+  cofinsValor?: number;
+
+  // Total do item
+  @Column({ type: 'decimal', precision: 14, scale: 2 })
+  totalItem: number;
+
+  // Observações
+  @Column({ type: 'text', nullable: true })
+  observacoes?: string;
+
+  // Número do item
+  @Column({ nullable: true })
+  numeroItem?: number;
+
+  // Auditoria
   @CreateDateColumn()
   createdAt: Date;
 
