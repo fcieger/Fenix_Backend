@@ -1,77 +1,64 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
 import { PedidosVendaService } from './pedidos-venda.service';
 import { CreatePedidoVendaDto } from './dto/create-pedido-venda.dto';
 import { UpdatePedidoVendaDto } from './dto/update-pedido-venda.dto';
-import { UpdateStatusPedidoDto } from './dto/update-status-pedido.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreatePedidoVendaFromOrcamentoDto } from './dto/create-from-orcamento.dto';
 
 @Controller('pedidos-venda')
-@UseGuards(JwtAuthGuard)
 export class PedidosVendaController {
-  constructor(private readonly pedidosVendaService: PedidosVendaService) {}
+  constructor(private readonly service: PedidosVendaService) {}
 
   @Post()
-  create(@Body() createPedidoDto: CreatePedidoVendaDto, @Request() req) {
-    return this.pedidosVendaService.create(createPedidoDto, req.user.activeCompanyId);
+  create(@Body() dto: CreatePedidoVendaDto) { return this.service.create(dto); }
+
+  @Post('from-orcamento/:orcamentoId')
+  async createFromOrcamento(
+    @Param('orcamentoId') orcamentoId: string, 
+    @Body() dto?: CreatePedidoVendaFromOrcamentoDto
+  ) {
+    const dtoCompleto: CreatePedidoVendaFromOrcamentoDto = {
+      orcamentoId,
+      ...dto,
+    };
+    return this.service.createFromOrcamento(dtoCompleto);
   }
 
   @Get()
-  findAll(
-    @Request() req,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    const pageNumber = page ? parseInt(page, 10) : 1;
-    const limitNumber = limit ? parseInt(limit, 10) : 10;
-    return this.pedidosVendaService.findAll(req.user.activeCompanyId, pageNumber, limitNumber);
+  async findAll(@Query() q: any) { 
+    const result = await this.service.findAll(q);
+    console.log(`[Controller] Retornando ${result.length} pedidos de venda`);
+    if (result.length > 0) {
+      console.log(`[Controller] Primeiro tem itens? ${!!result[0].itens}, quantidade: ${result[0].itens?.length || 0}`);
+      console.log(`[Controller] Primeiro tem chave itens? ${Object.prototype.hasOwnProperty.call(result[0], 'itens')}`);
+      console.log(`[Controller] Chaves do primeiro: ${Object.keys(result[0]).join(', ')}`);
+      // Garantir que itens está presente antes de retornar
+      if (!result[0].itens) {
+        console.log(`[Controller] ERRO: Primeiro pedido de venda não tem campo itens!`);
+      } else {
+        console.log(`[Controller] SUCESSO: Primeiro pedido de venda TEM campo itens com ${result[0].itens.length} itens!`);
+      }
+    }
+    // Retornar diretamente sem serialização adicional
+    return result;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.findOne(id, req.user.activeCompanyId);
+  findOne(@Param('id') id: string) { 
+    return this.service.findOne(id); 
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePedidoDto: UpdatePedidoVendaDto,
-    @Request() req,
-  ) {
-    return this.pedidosVendaService.update(id, updatePedidoDto, req.user.activeCompanyId);
+  @Put(':id')
+  update(@Param('id') id: string, @Body() dto: UpdatePedidoVendaDto) { 
+    return this.service.update(id, dto); 
   }
 
-  @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() updateStatusDto: UpdateStatusPedidoDto,
-    @Request() req,
-  ) {
-    return this.pedidosVendaService.updateStatus(id, updateStatusDto, req.user.activeCompanyId);
-  }
-
-  @Post(':id/clonar')
-  clonar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.clonar(id, req.user.activeCompanyId);
-  }
-
-  @Patch(':id/cancelar')
-  cancelar(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.cancelar(id, req.user.activeCompanyId);
+  @Post(':id/recalcular-impostos')
+  recalc(@Param('id') id: string) { 
+    return this.service.recalcularImpostos(id); 
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
-    return this.pedidosVendaService.remove(id, req.user.activeCompanyId);
+  remove(@Param('id') id: string) { 
+    return this.service.remove(id); 
   }
 }
