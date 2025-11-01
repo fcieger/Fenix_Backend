@@ -44,6 +44,7 @@ import { OrcamentoItem } from './orcamentos/entities/orcamento-item.entity';
 import { FormaPagamento } from './formas-pagamento/entities/forma-pagamento.entity';
 import { LocalEstoque } from './estoque/entities/local-estoque.entity';
 import { OrcamentosModule } from './orcamentos/orcamentos.module';
+import { InitDbModule } from './init-db/init-db.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { OrcamentosModule } from './orcamentos/orcamentos.module';
     NfeIntegrationModule,
     ContasFinanceirasModule,
     OrcamentosModule,
+    InitDbModule,
   ],
   controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController, TestRoutesController],
   providers: [AppService],

@@ -7,11 +7,19 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   // Configurar CORS
+  // Se CORS_ORIGIN estiver definida, usar ela; caso contrário, usar origins padrão
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : ["http://localhost:3004", "http://localhost:3000", "http://localhost:3002", "http://localhost:8080", "http://localhost:80", "https://fenixfrontendatual.vercel.app"];
+  
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:3004', 'http://localhost:8080'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    origin: corsOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   });
+  
+  console.log(`🔒 CORS configurado para: ${corsOrigins.join(', ')}`);
 
   // Configurar validação global
   app.useGlobalPipes(new ValidationPipe({
