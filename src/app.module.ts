@@ -39,6 +39,11 @@ import { Nfe } from './nfe/entities/nfe.entity';
 import { NfeItem } from './nfe/entities/nfe-item.entity';
 import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
 import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-financeira.entity';
+import { Orcamento } from './orcamentos/entities/orcamento.entity';
+import { OrcamentoItem } from './orcamentos/entities/orcamento-item.entity';
+import { FormaPagamento } from './formas-pagamento/entities/forma-pagamento.entity';
+import { LocalEstoque } from './estoque/entities/local-estoque.entity';
+import { OrcamentosModule } from './orcamentos/orcamentos.module';
 
 @Module({
   imports: [
@@ -51,8 +56,8 @@ import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-
         type: 'postgres',
         url: process.env.DATABASE_URL,
         ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-        entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira],
-        synchronize: process.env.NODE_ENV !== 'production', // true local, false produção
+        entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque],
+        synchronize: false, // Desabilitado temporariamente devido a problema de migração
         logging: process.env.NODE_ENV === 'development',
       }),
     }),
@@ -71,6 +76,7 @@ import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-
     NfeModule,
     NfeIntegrationModule,
     ContasFinanceirasModule,
+    OrcamentosModule,
   ],
   controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController, TestRoutesController],
   providers: [AppService],
