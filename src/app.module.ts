@@ -53,14 +53,19 @@ import { InitDbModule } from './init-db/init-db.module';
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        url: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-        entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque],
-        synchronize: false, // Desabilitado temporariamente devido a problema de migração
-        logging: process.env.NODE_ENV === 'development',
-      }),
+      useFactory: () => {
+        const isProduction = process.env.NODE_ENV === 'production';
+        return {
+          type: 'postgres',
+          url: process.env.DATABASE_URL,
+          ssl: isProduction ? { rejectUnauthorized: false } : false,
+          entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque],
+          migrations: isProduction ? ['dist/migrations/*.js'] : ['src/migrations/*.ts'],
+          migrationsRun: isProduction, // Executa migrações automaticamente em produção
+          synchronize: false,
+          logging: !isProduction,
+        };
+      },
     }),
     AuthModule,
     UsersModule,
