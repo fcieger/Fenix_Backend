@@ -20,7 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d ormconfig.js",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d ormconfig.js",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ormconfig.js"
+    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ormconfig.js",
+    "sync:db": "SYNC_TABLES=true tsx sync-database.ts",
+    "create:tables": "SYNC_TABLES=true npm run start:dev"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
