@@ -34,25 +34,46 @@ export class PedidosVendaController {
 
   @Get()
   async findAll(@Query() q: any, @Request() req) { 
-    // Usar companyId do usuário autenticado se não estiver nos query params
-    const companyId = q.companyId || req.user?.activeCompanyId;
-    const queryWithCompany = { ...q, companyId };
-    
-    const result = await this.service.findAll(queryWithCompany);
-    console.log(`[Controller] Retornando ${result.length} pedidos de venda para companyId: ${companyId}`);
-    if (result.length > 0) {
-      console.log(`[Controller] Primeiro tem itens? ${!!result[0].itens}, quantidade: ${result[0].itens?.length || 0}`);
-      console.log(`[Controller] Primeiro tem chave itens? ${Object.prototype.hasOwnProperty.call(result[0], 'itens')}`);
-      console.log(`[Controller] Chaves do primeiro: ${Object.keys(result[0]).join(', ')}`);
-      // Garantir que itens está presente antes de retornar
-      if (!result[0].itens) {
-        console.log(`[Controller] ERRO: Primeiro pedido de venda não tem campo itens!`);
-      } else {
-        console.log(`[Controller] SUCESSO: Primeiro pedido de venda TEM campo itens com ${result[0].itens.length} itens!`);
+    try {
+      // Usar companyId do usuário autenticado se não estiver nos query params
+      const companyId = q.companyId || req.user?.activeCompanyId || req.user?.companyId;
+      
+      // Validar que companyId está disponível
+      if (!companyId) {
+        console.error('[Controller] Erro: companyId não disponível', {
+          queryCompanyId: q.companyId,
+          userActiveCompanyId: req.user?.activeCompanyId,
+          userCompanyId: req.user?.companyId,
+          userId: req.user?.id,
+          userEmail: req.user?.email,
+          user: req.user ? 'presente' : 'ausente'
+        });
+        throw new Error('companyId é obrigatório. Forneça como query parameter (?companyId=...) ou certifique-se de que o usuário tem uma empresa ativa.');
       }
+      
+      const queryWithCompany = { ...q, companyId };
+      
+      console.log(`[Controller] Buscando pedidos de venda para companyId: ${companyId}`);
+      const result = await this.service.findAll(queryWithCompany);
+      
+      console.log(`[Controller] Retornando ${result.length} pedidos de venda para companyId: ${companyId}`);
+      if (result.length > 0) {
+        console.log(`[Controller] Primeiro tem itens? ${!!result[0].itens}, quantidade: ${result[0].itens?.length || 0}`);
+        console.log(`[Controller] Primeiro tem chave itens? ${Object.prototype.hasOwnProperty.call(result[0], 'itens')}`);
+        console.log(`[Controller] Chaves do primeiro: ${Object.keys(result[0]).join(', ')}`);
+        // Garantir que itens está presente antes de retornar
+        if (!result[0].itens) {
+          console.log(`[Controller] ERRO: Primeiro pedido de venda não tem campo itens!`);
+        } else {
+          console.log(`[Controller] SUCESSO: Primeiro pedido de venda TEM campo itens com ${result[0].itens.length} itens!`);
+        }
+      }
+      // Retornar diretamente sem serialização adicional
+      return result;
+    } catch (error: any) {
+      console.error('[Controller] Erro em findAll:', error);
+      throw error;
     }
-    // Retornar diretamente sem serialização adicional
-    return result;
   }
 
   @Get(':id')
