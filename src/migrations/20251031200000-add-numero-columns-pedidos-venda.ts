@@ -20,3 +20,4 @@ export class AddNumeroColumnsPedidosVenda20251031200000 implements MigrationInte
   }
 }
 
+
