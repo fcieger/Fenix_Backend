@@ -79,3 +79,4 @@ END $$;
 
 SELECT 'Todas as colunas foram adicionadas/verificadas!' as resultado;
 
+
