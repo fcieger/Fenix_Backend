@@ -32,22 +32,49 @@ import { ConfiguracaoNfe } from './configuracao-nfe/entities/configuracao-nfe.en
 import { Nfe } from './nfe/entities/nfe.entity';
 import { NfeItem } from './nfe/entities/nfe-item.entity';
 import { NfeDuplicata } from './nfe/entities/nfe-duplicata.entity';
+// Entidades adicionais - verifique se existem no projeto
+// Se essas entidades não existirem, remova-as ou ajuste os imports
+// import { ContaFinanceira } from './financeiro/contas-financeiras/entities/conta-financeira.entity';
+// import { Orcamento } from './orcamentos/entities/orcamento.entity';
+// import { OrcamentoItem } from './orcamentos/entities/orcamento-item.entity';
+// import { FormaPagamento } from './formas-pagamento/entities/forma-pagamento.entity';
+// import { LocalEstoque } from './estoque/entities/local-estoque.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USERNAME || 'fenix_user',
-      password: process.env.DB_PASSWORD || 'fenix_password',
-      database: process.env.DB_DATABASE || 'fenix_db',
-      entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata],
-      synchronize: process.env.NODE_ENV === 'development',
-      logging: process.env.NODE_ENV === 'development',
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        const syncTables = process.env.SYNC_TABLES === 'true' || process.env.NODE_ENV !== 'production';
+        // Neon requer SSL sempre, então configuramos SSL para todas as conexões
+        const needsSsl = process.env.DATABASE_URL?.includes('neon.tech') || process.env.NODE_ENV === 'production';
+        return {
+          type: 'postgres',
+          url: process.env.DATABASE_URL,
+          ssl: needsSsl ? { rejectUnauthorized: false } : false,
+          autoLoadEntities: true,
+          synchronize: syncTables, // true quando SYNC_TABLES=true ou em desenvolvimento
+          entities: [
+            User,
+            Company,
+            Cadastro,
+            Produto,
+            UserAccessLog,
+            NaturezaOperacao,
+            ConfiguracaoImpostoEstado,
+            PedidoVenda,
+            PedidoVendaItem,
+            PrazoPagamento,
+            Certificado,
+            ConfiguracaoNfe,
+            Nfe,
+            NfeItem,
+            NfeDuplicata,
+          ],
+        };
+      },
     }),
     AuthModule,
     UsersModule,
