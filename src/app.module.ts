@@ -60,8 +60,8 @@ import { InitDbModule } from './init-db/init-db.module';
           url: process.env.DATABASE_URL,
           ssl: isProduction ? { rejectUnauthorized: false } : false,
           entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque],
-          migrations: isProduction ? ['dist/migrations/*.js'] : ['src/migrations/*.ts'],
-          migrationsRun: isProduction, // Executa migrações automaticamente em produção
+          migrations: isProduction ? ['dist/migrations/*.js'] : [], // Desabilitado em desenvolvimento
+          migrationsRun: false, // Nunca executa migrations automaticamente
           synchronize: false,
           logging: !isProduction,
         };
