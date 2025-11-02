@@ -1,20 +1,29 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Query, UseGuards, Request } from '@nestjs/common';
 import { PedidosVendaService } from './pedidos-venda.service';
 import { CreatePedidoVendaDto } from './dto/create-pedido-venda.dto';
 import { UpdatePedidoVendaDto } from './dto/update-pedido-venda.dto';
 import { CreatePedidoVendaFromOrcamentoDto } from './dto/create-from-orcamento.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('pedidos-venda')
+@UseGuards(JwtAuthGuard)
 export class PedidosVendaController {
   constructor(private readonly service: PedidosVendaService) {}
 
   @Post()
-  create(@Body() dto: CreatePedidoVendaDto) { return this.service.create(dto); }
+  create(@Body() dto: CreatePedidoVendaDto, @Request() req) { 
+    // Garantir que companyId está no DTO se não estiver
+    if (!dto.companyId && req.user?.activeCompanyId) {
+      dto.companyId = req.user.activeCompanyId;
+    }
+    return this.service.create(dto); 
+  }
 
   @Post('from-orcamento/:orcamentoId')
   async createFromOrcamento(
     @Param('orcamentoId') orcamentoId: string, 
-    @Body() dto?: CreatePedidoVendaFromOrcamentoDto
+    @Body() dto?: CreatePedidoVendaFromOrcamentoDto,
+    @Request() req?: any
   ) {
     const dtoCompleto: CreatePedidoVendaFromOrcamentoDto = {
       orcamentoId,
@@ -24,9 +33,13 @@ export class PedidosVendaController {
   }
 
   @Get()
-  async findAll(@Query() q: any) { 
-    const result = await this.service.findAll(q);
-    console.log(`[Controller] Retornando ${result.length} pedidos de venda`);
+  async findAll(@Query() q: any, @Request() req) { 
+    // Usar companyId do usuário autenticado se não estiver nos query params
+    const companyId = q.companyId || req.user?.activeCompanyId;
+    const queryWithCompany = { ...q, companyId };
+    
+    const result = await this.service.findAll(queryWithCompany);
+    console.log(`[Controller] Retornando ${result.length} pedidos de venda para companyId: ${companyId}`);
     if (result.length > 0) {
       console.log(`[Controller] Primeiro tem itens? ${!!result[0].itens}, quantidade: ${result[0].itens?.length || 0}`);
       console.log(`[Controller] Primeiro tem chave itens? ${Object.prototype.hasOwnProperty.call(result[0], 'itens')}`);
@@ -43,12 +56,16 @@ export class PedidosVendaController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { 
+  findOne(@Param('id') id: string, @Request() req) { 
     return this.service.findOne(id); 
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdatePedidoVendaDto) { 
+  update(@Param('id') id: string, @Body() dto: UpdatePedidoVendaDto, @Request() req) { 
+    // Garantir que companyId está no DTO se não estiver
+    if (!dto.companyId && req.user?.activeCompanyId) {
+      dto.companyId = req.user.activeCompanyId;
+    }
     return this.service.update(id, dto); 
   }
 
