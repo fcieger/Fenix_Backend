@@ -25,3 +25,4 @@ ALTER TABLE pedidos_venda ALTER COLUMN status SET DEFAULT 'rascunho'::status_ped
 
 SELECT 'Coluna status convertida para enum com sucesso!' as resultado;
 
+
