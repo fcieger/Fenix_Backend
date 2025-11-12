@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CadastrosService } from './cadastros.service';
 import { CreateCadastroDto } from './dto/create-cadastro.dto';
@@ -41,8 +41,9 @@ export class CadastrosController {
   }
 
   @Get()
-  async findAll(@Request() req) {
-    const companyId = req.user.activeCompanyId;
+  async findAll(@Request() req, @Query('company_id') companyIdParam?: string) {
+    const companyId = companyIdParam || req.user.activeCompanyId;
+    console.log('🔍 GET /cadastros - companyId:', companyId, '(from query param:', companyIdParam, ', from user:', req.user.activeCompanyId, ')');
     return await this.cadastrosService.findAll(companyId);
   }
 

@@ -73,8 +73,11 @@ export class AddMissingColumnsToPedidosVenda1761958229391 implements MigrationIn
         await queryRunner.query(`ALTER TABLE "formas_pagamento" ALTER COLUMN "padrao" SET NOT NULL`);
         await queryRunner.query(`ALTER TABLE "formas_pagamento" ALTER COLUMN "created_at" SET NOT NULL`);
         await queryRunner.query(`ALTER TABLE "formas_pagamento" ALTER COLUMN "updated_at" SET NOT NULL`);
-        await queryRunner.query(`ALTER TABLE "locais_estoque" DROP COLUMN "nome"`);
-        await queryRunner.query(`ALTER TABLE "locais_estoque" ADD "nome" character varying NOT NULL`);
+        // Atualizar registros existentes antes de tornar NOT NULL
+        await queryRunner.query(`ALTER TABLE "locais_estoque" DROP COLUMN IF EXISTS "nome"`);
+        await queryRunner.query(`ALTER TABLE "locais_estoque" ADD "nome" character varying NULL`);
+        await queryRunner.query(`UPDATE "locais_estoque" SET nome = 'Local ' || COALESCE(codigo, id::text) WHERE nome IS NULL`);
+        await queryRunner.query(`ALTER TABLE "locais_estoque" ALTER COLUMN "nome" SET NOT NULL`);
         await queryRunner.query(`ALTER TABLE "locais_estoque" DROP COLUMN "codigo"`);
         await queryRunner.query(`ALTER TABLE "locais_estoque" ADD "codigo" character varying`);
         await queryRunner.query(`ALTER TABLE "locais_estoque" ALTER COLUMN "createdAt" SET DEFAULT now()`);

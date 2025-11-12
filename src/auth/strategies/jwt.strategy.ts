@@ -9,46 +9,43 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'fenix-jwt-secret-key-2024-super-secure',
+      secretOrKey: process.env.JWT_SECRET || 'fenix-jwt-secret-key-2024-super-secure',
     });
   }
 
   async validate(payload: any) {
-    console.log('🔍 Debug JWT - Payload recebido:', payload);
+    // O token pode ter userId ou sub
+    const userId = payload.userId || payload.sub;
     
-    const user = await this.usersService.findById(payload.sub);
-    
-    if (!user) {
-      console.log('❌ Debug JWT - Usuário não encontrado para ID:', payload.sub);
+    if (!userId) {
+      console.error('❌ JWT Strategy: Token sem userId ou sub');
       return null;
     }
     
-    console.log('🔍 Debug JWT - Usuário encontrado:', {
-      id: user.id,
-      email: user.email,
-      companies: user.companies,
-      companiesLength: user.companies?.length
-    });
+    console.log('🔍 JWT Strategy: Validando usuário com ID:', userId);
+    const user = await this.usersService.findById(userId);
     
+    if (!user) {
+      console.error('❌ JWT Strategy: Usuário não encontrado com ID:', userId);
+      return null;
+    }
+    
+    console.log('✅ JWT Strategy: Usuário encontrado:', user.email);
     const { password: _, ...result } = user;
+    
+    // Usar companyId do payload se existir, senão usar primeira empresa do usuário
+    const companyIdFromToken = payload.companyId;
     
     // Usar companyId real do usuário (primeira empresa se houver)
     if (result.companies && result.companies.length > 0) {
-      (result as any).companyId = result.companies[0].id;
-      (result as any).activeCompanyId = result.companies[0].id;
-      console.log('✅ Debug JWT - CompanyId real:', result.companies[0].id);
+      (result as any).companyId = companyIdFromToken || result.companies[0].id;
+      (result as any).activeCompanyId = companyIdFromToken || result.companies[0].id;
+      (result as any).userId = result.id;
     } else {
-      console.log('⚠️ Debug JWT - Usuário sem empresas associadas');
-      (result as any).companyId = null;
-      (result as any).activeCompanyId = null;
+      (result as any).companyId = companyIdFromToken || null;
+      (result as any).activeCompanyId = companyIdFromToken || null;
+      (result as any).userId = result.id;
     }
-    
-    console.log('🔍 Debug JWT - Resultado final:', {
-      id: result.id,
-      email: result.email,
-      companyId: (result as any).companyId,
-      companies: result.companies
-    });
     
     return result;
   }

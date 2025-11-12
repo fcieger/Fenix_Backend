@@ -19,7 +19,7 @@ const getDataSourceConfig = () => {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
     username: process.env.DB_USERNAME || 'postgres',
-    password: process.env.DB_PASSWORD || 'fenix123',
+    password: String(process.env.DB_PASSWORD || 'fenix123'),
     database: process.env.DB_DATABASE || 'fenix',
     entities: ['src/**/*.entity.ts'],
     migrations: ['src/migrations/*.ts'],

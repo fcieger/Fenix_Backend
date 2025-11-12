@@ -45,6 +45,19 @@ import { FormaPagamento } from './formas-pagamento/entities/forma-pagamento.enti
 import { LocalEstoque } from './estoque/entities/local-estoque.entity';
 import { OrcamentosModule } from './orcamentos/orcamentos.module';
 import { InitDbModule } from './init-db/init-db.module';
+import { CreditoModule } from './credito/credito.module';
+import { SolicitacaoCredito } from './credito/entities/solicitacao-credito.entity';
+import { DocumentoCredito } from './credito/entities/documento-credito.entity';
+import { AnaliseCredito } from './credito/entities/analise-credito.entity';
+import { PropostaCredito } from './credito/entities/proposta-credito.entity';
+import { CapitalGiro } from './credito/entities/capital-giro.entity';
+import { MovimentacaoCapitalGiro } from './credito/entities/movimentacao-capital-giro.entity';
+import { AntecipacaoRecebiveis } from './credito/entities/antecipacao-recebiveis.entity';
+import { VisualizacaoProposta } from './credito/entities/visualizacao-proposta.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/entities/notification.entity';
+import { ChatModule } from './chat/chat.module';
+import { ChatMessage } from './chat/entities/chat-message.entity';
 
 @Module({
   imports: [
@@ -55,16 +68,30 @@ import { InitDbModule } from './init-db/init-db.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const isProduction = process.env.NODE_ENV === 'production';
-        return {
+        
+        // Se DATABASE_URL estiver definida, usar ela (Neon em produção)
+        // Caso contrário, usar variáveis individuais (banco local em desenvolvimento)
+        const config: any = {
           type: 'postgres',
-          url: process.env.DATABASE_URL,
-          ssl: isProduction ? { rejectUnauthorized: false } : false,
-          entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque],
-          migrations: isProduction ? ['dist/migrations/*.js'] : [], // Desabilitado em desenvolvimento
-          migrationsRun: false, // Nunca executa migrations automaticamente
+          entities: [User, Company, Cadastro, Produto, UserAccessLog, NaturezaOperacao, ConfiguracaoImpostoEstado, PedidoVenda, PedidoVendaItem, PrazoPagamento, Certificado, ConfiguracaoNfe, Nfe, NfeItem, NfeDuplicata, ContaFinanceira, Orcamento, OrcamentoItem, FormaPagamento, LocalEstoque, SolicitacaoCredito, DocumentoCredito, AnaliseCredito, PropostaCredito, CapitalGiro, MovimentacaoCapitalGiro, AntecipacaoRecebiveis, VisualizacaoProposta, Notification, ChatMessage],
+          migrations: isProduction ? ['dist/migrations/*.js'] : [],
+          migrationsRun: false,
           synchronize: false,
           logging: !isProduction,
         };
+        
+        if (process.env.DATABASE_URL) {
+          config.url = process.env.DATABASE_URL;
+          config.ssl = isProduction ? { rejectUnauthorized: false } : false;
+        } else {
+          config.host = process.env.DB_HOST || 'localhost';
+          config.port = parseInt(process.env.DB_PORT || '5432');
+          config.username = process.env.DB_USERNAME || 'postgres';
+          config.password = String(process.env.DB_PASSWORD || 'fenix123');
+          config.database = process.env.DB_DATABASE || 'fenix';
+        }
+        
+        return config;
       },
     }),
     AuthModule,
@@ -84,6 +111,9 @@ import { InitDbModule } from './init-db/init-db.module';
     ContasFinanceirasModule,
     OrcamentosModule,
     InitDbModule,
+    CreditoModule,
+    NotificationsModule,
+    ChatModule,
   ],
   controllers: [AppController, TestSimpleController, HealthController, SimpleHealthController, TestRoutesController],
   providers: [AppService],
