@@ -14,40 +14,54 @@ export class OrcamentosService {
   ) {}
 
   async create(dto: CreateOrcamentoDto) {
-    const { itens = [], ...rest } = dto as any;
-    const orc = new Orcamento();
-    Object.assign(orc, {
-      ...rest,
-      dataEmissao: new Date(dto.dataEmissao),
-      dataPrevisaoEntrega: dto.dataPrevisaoEntrega ? new Date(dto.dataPrevisaoEntrega) : null,
-      dataValidade: dto.dataValidade ? new Date(dto.dataValidade) : null,
-      itens: itens.map((i: any) => {
-        const item = new OrcamentoItem();
-        Object.assign(item, { ...i, totalItem: 0, companyId: dto.companyId });
-        return item;
-      }),
-    });
-    this.recalcularTotais(orc);
-    return this.repo.save(orc);
+    try {
+      console.log('[OrcamentosService] Criando orçamento:', JSON.stringify(dto, null, 2));
+      const { itens = [], ...rest } = dto as any;
+      const orc = new Orcamento();
+      Object.assign(orc, {
+        ...rest,
+        dataEmissao: new Date(dto.dataEmissao),
+        dataPrevisaoEntrega: dto.dataPrevisaoEntrega ? new Date(dto.dataPrevisaoEntrega) : null,
+        itens: itens.map((i: any) => {
+          const item = new OrcamentoItem();
+          Object.assign(item, { ...i, totalItem: 0, companyId: dto.companyId });
+          return item;
+        }),
+      });
+      this.recalcularTotais(orc);
+      console.log('[OrcamentosService] Orçamento preparado, salvando...');
+      const saved = await this.repo.save(orc);
+      console.log('[OrcamentosService] Orçamento salvo com sucesso:', saved.id);
+      return saved;
+    } catch (error: any) {
+      console.error('[OrcamentosService] Erro ao criar orçamento:', error);
+      console.error('[OrcamentosService] Stack:', error.stack);
+      console.error('[OrcamentosService] Message:', error.message);
+      throw error;
+    }
   }
 
   async findAll(query: { status?: StatusOrcamento; clienteId?: string; companyId?: string; inicio?: string; fim?: string }) {
-    const where: any = {};
-    if (query.status) where.status = query.status;
-    if (query.clienteId) where.clienteId = query.clienteId;
-    if (query.companyId) where.companyId = query.companyId;
-    if (query.inicio && query.fim) {
-      where.dataEmissao = Between(new Date(query.inicio), new Date(query.fim));
-    } else if (query.inicio) {
-      where.dataEmissao = MoreThanOrEqual(new Date(query.inicio));
-    } else if (query.fim) {
-      where.dataEmissao = LessThanOrEqual(new Date(query.fim));
-    }
-    const orcamentos = await this.repo.find({ 
-      where, 
-      relations: ['cliente', 'vendedor', 'transportadora', 'prazoPagamento', 'formaPagamento', 'localEstoque'],
-      order: { createdAt: 'DESC' } 
-    });
+    try {
+      console.log('[OrcamentosService] findAll iniciado com query:', JSON.stringify(query, null, 2));
+      const where: any = {};
+      if (query.status) where.status = query.status;
+      if (query.clienteId) where.clienteId = query.clienteId;
+      if (query.companyId) where.companyId = query.companyId;
+      if (query.inicio && query.fim) {
+        where.dataEmissao = Between(new Date(query.inicio), new Date(query.fim));
+      } else if (query.inicio) {
+        where.dataEmissao = MoreThanOrEqual(new Date(query.inicio));
+      } else if (query.fim) {
+        where.dataEmissao = LessThanOrEqual(new Date(query.fim));
+      }
+      console.log('[OrcamentosService] Buscando orçamentos com where:', JSON.stringify(where, null, 2));
+      const orcamentos = await this.repo.find({ 
+        where, 
+        relations: ['cliente', 'vendedor', 'transportadora', 'prazoPagamento', 'formaPagamento', 'localEstoque'],
+        order: { createdAt: 'DESC' } 
+      });
+      console.log(`[OrcamentosService] Encontrados ${orcamentos.length} orçamentos`);
     
     // Carregar itens separadamente e criar objetos planos para garantir serialização
     const result: any[] = [];
@@ -84,7 +98,14 @@ export class OrcamentosService {
       console.log(`[DEBUG] Primeiro tem chave itens? ${Object.prototype.hasOwnProperty.call(result[0], 'itens')}`);
       console.log(`[DEBUG] Todas as chaves do primeiro: ${Object.keys(result[0]).join(', ')}`);
     }
+    console.log('[OrcamentosService] findAll concluído com sucesso');
     return result;
+    } catch (error: any) {
+      console.error('[OrcamentosService] Erro em findAll:', error);
+      console.error('[OrcamentosService] Stack:', error.stack);
+      console.error('[OrcamentosService] Message:', error.message);
+      throw error;
+    }
   }
 
   async findOne(id: string) {
@@ -104,7 +125,6 @@ export class OrcamentosService {
       ...rest,
       dataEmissao: dto.dataEmissao ? new Date(dto.dataEmissao) : existing.dataEmissao,
       dataPrevisaoEntrega: dto.dataPrevisaoEntrega ? new Date(dto.dataPrevisaoEntrega) : existing.dataPrevisaoEntrega,
-      dataValidade: dto.dataValidade ? new Date(dto.dataValidade) : existing.dataValidade,
     });
 
     if (itens) {
