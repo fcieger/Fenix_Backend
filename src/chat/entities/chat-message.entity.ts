@@ -47,3 +47,4 @@ export class ChatMessage {
   createdAt: Date;
 }
 
+
