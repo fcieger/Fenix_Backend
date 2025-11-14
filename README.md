@@ -31,6 +31,21 @@
 $ npm install
 ```
 
+## Environment Configuration
+
+1. Copy the example environment file:
+```bash
+$ cp .env.example .env
+```
+
+2. Edit `.env` and fill in your actual values:
+   - `DB_PASSWORD`: Your PostgreSQL database password
+   - `JWT_SECRET`: A secure random string for JWT token signing
+   - `ENCRYPTION_KEY`: A secure encryption key
+   - `OPENAI_API_KEY`: Your OpenAI API key (optional, for AI features)
+
+**⚠️ IMPORTANT**: Never commit `.env` files to the repository. They contain sensitive information and are already in `.gitignore`.
+
 ## Compile and run the project
 
 ```bash
