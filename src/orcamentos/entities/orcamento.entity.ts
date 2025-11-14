@@ -34,7 +34,7 @@ export class Orcamento {
   @Column({ nullable: true })
   serie: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'numeroOrdemCompra', nullable: true })
   numeroPedidoCotacao: string;
 
   // Datas
@@ -43,9 +43,6 @@ export class Orcamento {
 
   @Column({ type: 'date', nullable: true })
   dataPrevisaoEntrega: Date;
-
-  @Column({ type: 'date', nullable: true })
-  dataValidade: Date;
 
   // Relacionamentos principais
   @ManyToOne(() => Cadastro, { eager: true })
