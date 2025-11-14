@@ -38,7 +38,6 @@ export class CreateOrcamentoDto {
 
   @IsDateString() dataEmissao: string;
   @IsOptional() @IsDateString() dataPrevisaoEntrega?: string;
-  @IsOptional() @IsDateString() dataValidade?: string;
 
   @IsOptional() @IsString() numero?: string;
   @IsOptional() @IsString() serie?: string;
