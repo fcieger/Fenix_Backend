@@ -29,3 +29,4 @@ import { AggregatorService } from './integrations/aggregator.service';
 export class LicitacoesModule {}
 
 
+
