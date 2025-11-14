@@ -4,3 +4,4 @@ import { CreateAlertaDto } from './create-alerta.dto';
 export class UpdateAlertaDto extends PartialType(CreateAlertaDto) {}
 
 
+
